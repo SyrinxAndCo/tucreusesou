@@ -1,0 +1,22 @@
+{
+    "name": "tucreusesou/tucreusesou",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "TuCreusesOu\\": "src",
+            "TuCreusesOu\\Controller\\": "src/Controller",
+            "TuCreusesOu\\Model\\": "src/Model",
+            "TuCreusesOu\\View\\": "src/View",
+            "TuCreusesOu\\TwigExtension\\": "src/TwigExtension"
+        }
+    },
+    "authors": [
+        {
+            "name": "Syrinx",
+            "email": "faujoux@gmail.com"
+        }
+    ],
+    "require": {
+        "twig/twig": "^3.6"
+    }
+}

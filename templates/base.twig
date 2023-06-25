@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr-FR">
+    <head>
+        <title>{{titre}}</title>
+        <meta charset="utf-8">
+        <meta name="description" content="Tu creuses où ?">
+        {% for style in styles %}
+            <link rel="stylesheet" href="{{style}}?version={{version}}">
+        {% endfor %}
+        {% for style in stylesTwig|keys %}
+            {% include style %}
+        {% endfor %}
+        {% block header %}
+            {% if blocks.header %}
+                {{block(blocks.header.blockName, blocks.header.file)}}
+            {% endif %}
+        {% endblock %}
+    </head>
+    <body onload="{{onLoad}}" {{bodyParams}}>
+        <div id="corps">
+            <div id="page">
+                {% block banniere %}
+                    {% if blocks.banniere %}
+                        {{block(blocks.banniere.blockName, blocks.banniere.file)}}
+                    {% endif %}
+                {% endblock %}
+                {% block menuGauche %}
+                    {% if blocks.menuGauche %}
+                        {{block(blocks.menuGauche.blockName, blocks.menuGauche.file)}}
+                    {% endif %}
+                {% endblock %}
+                <div id="contenu">
+                    {% block contenu %}
+                        {% if blocks.contenu %}
+                            {{block(blocks.contenu.blockName, blocks.contenu.file)}}
+                        {% endif %}
+                    {% endblock %}
+                </div>
+                {% block menuDroite %}
+                    {% if blocks.menuDroite %}
+                        {{block(blocks.menuDroite.blockName, blocks.menuDroite.file)}}
+                    {% endif %}
+                {% endblock %}
+                {% block pied2page %}
+                    {% if blocks.pied2page %}
+                        {{block(blocks.pied2page.blockName, blocks.pied2page.file)}}
+                    {% endif %}
+                {% endblock %}
+            </div>
+        </div>
+        <footer>
+            {% for script in scriptsSource %}
+                <script>{{ script|raw }}</script>
+            {% endfor %}
+            {% for script in scripts %}
+                <script src="{{script}}?version={{version}}"></script>
+            {% endfor %}
+            {% for script in scriptsTwig|keys %}
+                {% include script %}
+            {% endfor %}
+            {% block footer %}
+                {% if blocks.footer %}
+                    {{block(blocks.footer.blockName, blocks.footer.file)}}
+                {% endif %}
+            {% endblock %}
+        </footer>
+    </body>
+</html>
