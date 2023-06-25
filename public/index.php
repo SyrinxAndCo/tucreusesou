@@ -4,11 +4,11 @@
 use TuCreusesOu\Controller\Controller;
 use TuCreusesOu\Controller\IndexController;
 
-include_once 'vendor/autoload.php';
+include_once '../vendor/autoload.php';
 
 $requestUri = $_SERVER['REQUEST_URI'];
 
-$controllersFiles = scandir('src/Controller');
+$controllersFiles = scandir('../src/Controller');
 $controllers = [];
 foreach ($controllersFiles as $controller) {
     if (strpos($controller, 'Controller.php') > 0) {
