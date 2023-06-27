@@ -17,6 +17,10 @@
         }
     ],
     "require": {
-        "twig/twig": "^3.6"
+        "twig/twig": "^3.6",
+        "ext-pdo": "*"
+    },
+    "platform": {
+        "php": "8.2"
     }
 }

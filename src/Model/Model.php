@@ -1,6 +1,6 @@
 <?php
 
-namespace Model;
+namespace TuCreusesOu\Model;
 
 use PDO;
 use PDOException;
