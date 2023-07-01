@@ -10,6 +10,7 @@ class Contrat extends Model {
     private int $dateDebut;
     private ?int $dateFin;
     private Departement $departement;
+    private bool $enActivite;
 
     /**
      * @param ?int $id
@@ -17,13 +18,15 @@ class Contrat extends Model {
      * @param int $dateDebut
      * @param ?int $dateFin
      * @param Departement $departement
+     * @param bool $enActivite
      */
-    public function __construct(?int $id, int $idProfil, int $dateDebut, ?int $dateFin, Departement $departement) {
+    public function __construct(int $idProfil, int $dateDebut, ?int $dateFin, Departement $departement, bool $enActivite, ?int $id = null) {
         $this->id = $id;
         $this->idProfil = $idProfil;
         $this->dateDebut = $dateDebut;
         $this->dateFin = $dateFin;
         $this->departement = $departement;
+        $this->enActivite = $enActivite;
         parent::__construct();
     }
 
@@ -53,13 +56,13 @@ class Contrat extends Model {
      */
     private static function getContratParX(string $cle, int $valeur): ?Contrat {
         $query = self::getDB()->prepare(
-            'SELECT c.id, c.idProfil, c.dateDebut, c.dateFin, c.idDepartement, d.numero AS numeroDepartement, d.nom AS nomDepartement FROM ' . self::TABLE . ' AS c' .
+            'SELECT c.id, c.idProfil, c.dateDebut, c.dateFin, c.idDepartement, c.enActivite, d.numero AS numeroDepartement, d.nom AS nomDepartement FROM ' . self::TABLE . ' AS c' .
             ' LEFT JOIN ' . self::TABLE_DEPARTEMENT . ' AS d ON c.idDepartement = d.id WHERE c.' . $cle . ' = :' . $cle
         );
         if ($query) {
             if ($query->execute([$cle => $valeur])) {
                 $res = $query->fetch();
-                return new Contrat($res['id'], $res['idProfil'], $res['dateDebut'], $res['dateFin'], new Departement($res['idDepartement'], $res['numeroDepartement'], $res['nomDepartement']));
+                return new Contrat($res['idProfil'], $res['dateDebut'], $res['dateFin'], new Departement($res['idDepartement'], $res['numeroDepartement'], $res['nomDepartement']), $res['enActivite'], $res['id']);
             }
         }
         return null;
@@ -71,30 +74,41 @@ class Contrat extends Model {
      */
     public function sauvegarde(): bool {
         if ($this->id) {
-            $query = self::getDB()->prepare('UPDATE ' . self::TABLE . ' SET (idProfil = :idProfil, dateDebut = :dateDebut, dateFin = :dateFin, idDepartement = :idDepartement) WHERE id = :id');
+            $query = self::getDB()->prepare('UPDATE ' . self::TABLE . ' SET (idProfil = :idProfil, dateDebut = :dateDebut, dateFin = :dateFin, idDepartement = :idDepartement, enActivite = :enActivite) WHERE id = :id');
             return $query->execute(
                 [
-                    "id" => $this->id,
-                    "idProfil" => $this->idProfil,
-                    "dateDebut" => $this->dateDebut,
-                    "dateFin" => $this->dateFin,
-                    "idDepartement" => $this->departement->getId(),
+                    'id' => $this->id,
+                    'idProfil' => $this->idProfil,
+                    'dateDebut' => $this->dateDebut,
+                    'dateFin' => $this->dateFin,
+                    'idDepartement' => $this->departement->getId(),
+                    'enActivite' => $this->enActivite
                 ]
             );
         } else {
-            $query = self::getDB()->prepare('INSERT INTO ' . self::TABLE . '(idProfil, dateDebut, dateFin, idDepartement) VALUES (:idProfil, :dateDebut, :dateFin, :idDepartement)');
+            $query = self::getDB()->prepare('INSERT INTO ' . self::TABLE . '(idProfil, dateDebut, dateFin, idDepartement, enActivite) VALUES (:idProfil, :dateDebut, :dateFin, :idDepartement, :enActivite)');
             if ($query) {
                 return $query->execute(
                     [
-                        "idProfil" => $this->idProfil,
-                        "dateDebut" => $this->dateDebut,
-                        "dateFin" => $this->dateFin,
-                        "idDepartement" => $this->departement->getId(),
+                        'idProfil' => $this->idProfil,
+                        'dateDebut' => $this->dateDebut,
+                        'dateFin' => $this->dateFin,
+                        'idDepartement' => $this->departement->getId(),
+                        'enActivite' => $this->enActivite
                     ]
                 );
             }
         }
         return false;
+    }
+
+    /**
+     * Supprime le contrat de la BDD
+     * @return bool
+     */
+    public function supprime(): bool {
+        $query = self::getDB()->prepare('DELETE FROM ' . self::TABLE . ' WHERE id = :id');
+        return $query && $query->execute(['id' => $this->id]);
     }
 
     /**
@@ -165,5 +179,19 @@ class Contrat extends Model {
      */
     public function setDepartement(Departement $departement): void {
         $this->departement = $departement;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isEnActivite(): bool {
+        return $this->enActivite;
+    }
+
+    /**
+     * @param bool $enActivite
+     */
+    public function setEnActivite(bool $enActivite): void {
+        $this->enActivite = $enActivite;
     }
 }

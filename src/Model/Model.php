@@ -11,7 +11,7 @@ abstract class Model {
     protected function __construct() {
     }
 
-    protected static function getDB(string $host = BDD_SERVER, string $dbName = BDD_NAME, string $user = BDD_USER, string $password = BDD_PASSWORD) {
+    protected static function getDB(string $host = BDD_SERVER, string $dbName = BDD_NAME, string $user = BDD_USER, string $password = BDD_PASSWORD): ?PDO {
         if (self::$pdoInstance === null) {
             try {
                 self::$pdoInstance = new PDO('mysql:host=' . $host . ';dbname=' . $dbName, $user, $password);
