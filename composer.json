@@ -7,7 +7,8 @@
             "TuCreusesOu\\Controller\\": "src/Controller",
             "TuCreusesOu\\Model\\": "src/Model",
             "TuCreusesOu\\View\\": "src/View",
-            "TuCreusesOu\\TwigExtension\\": "src/TwigExtension"
+            "TuCreusesOu\\TwigExtension\\": "src/TwigExtension",
+            "TuCreusesOu\\Helper\\": "src/Helper"
         }
     },
     "authors": [
@@ -18,7 +19,8 @@
     ],
     "require": {
         "twig/twig": "^3.6",
-        "ext-pdo": "*"
+        "ext-pdo": "*",
+        "sendinblue/api-v3-sdk": "^8.4"
     },
     "platform": {
         "php": "8.2"
