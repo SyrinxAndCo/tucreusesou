@@ -93,10 +93,9 @@ class Profil extends Model {
      * @return bool
      */
     public function supprime(): bool {
-        $res = true;
         $query = self::getDB()->prepare('DELETE FROM ' . self::TABLE_AMIS . ' WHERE idSource = :idSource OR idAmi = :idAmi');
         if ($query) {
-            $res = $res && $query->execute(
+            $res = $query->execute(
                 [
                     'idSource' => $this->id,
                     'idAmi' => $this->id
