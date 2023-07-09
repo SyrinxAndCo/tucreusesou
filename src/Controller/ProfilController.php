@@ -21,7 +21,7 @@ class ProfilController extends Controller {
         $this->view->renderProfil($profil);
     }
 
-    public function getMessageErreur(): string {
+    protected function getMessageErreur(string $code): string {
         return '';
     }
 }

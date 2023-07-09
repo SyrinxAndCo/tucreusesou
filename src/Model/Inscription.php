@@ -2,7 +2,8 @@
 
 namespace TuCreusesOu\Model;
 
-use Exception;
+use TuCreusesOu\Helper\InscriptionCodeInconnuException;
+use TuCreusesOu\Helper\InscriptionDelaiException;
 
 class Inscription extends Model {
     private const TABLE = 'inscription';
@@ -54,6 +55,25 @@ class Inscription extends Model {
     }
 
     /**
+     * Vérifie si une inscription est déjà en cours avec le mail passé en paramètre
+     * @param string $mail
+     * @return bool
+     */
+    public static function mailDejaPris(string $mail): bool {
+        $query = self::getDB()->prepare('SELECT EXISTS(SELECT 1 FROM ' . self::TABLE . ' WHERE mail = :mail)');
+        if ($query) {
+            if ($query->execute(['mail' => $mail])) {
+                $inscription = $query->fetch();
+                if ($inscription) {
+                    return $inscription[0];
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Sauvegarde l'inscription en BDD
      * @return string|null
      */
@@ -101,21 +121,22 @@ class Inscription extends Model {
      * Valide l'inscription en utilisant le code de validation
      * @param string $code
      * @return bool
-     * @throws Exception
+     * @throws InscriptionCodeInconnuException
+     * @throws InscriptionDelaiException
      */
     public static function valideInscription(string $code): bool {
         $inscription = self::getInscriptionParCode($code);
         if ($inscription) {
             if ($inscription->getTimestamp() + self::DELAI_VALIDATION < time()) {
                 $inscription->supprime();
-                throw new Exception('Délai de validation de l\'inscription dépassé, veuillez renouveler votre inscription.');
+                throw new InscriptionDelaiException('Délai de validation de l\'inscription dépassé, veuillez renouveler votre inscription.');
             }
             $profil = new Profil($inscription->nom, $inscription->prenom, $inscription->mdp, $inscription->mail, []);
             if ($profil->sauvegarde()) {
                 return $inscription->supprime();
             }
         } else {
-            throw new Exception('Ce code de validation d\'inscription n\'existe pas.');
+            throw new InscriptionCodeInconnuException('Ce code de validation d\'inscription n\'existe pas.');
         }
         return false;
     }

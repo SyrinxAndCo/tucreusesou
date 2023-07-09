@@ -1,0 +1,44 @@
+{% block inscriptionFormulaire %}
+    <h1>
+        Inscription à Tu Creuses où ?
+    </h1>
+    {% if erreur %}
+        <div class="erreur">
+            {{ erreur }}
+        </div>
+    {% endif %}
+    <form action="/inscription/post" id="TuCreusesOu" method="post">
+        <input type="hidden" name="token" id="token" value="{{ token }}" />
+        <div class="champ">
+            <label>
+                Nom :
+                <input type="text" name="nom" id="nom" value="{{ post.nom }}" required/>
+            </label>
+        </div>
+        <div class="champ">
+            <label>
+                Prénom :
+                <input type="text" name="prenom" id="prenom" value="{{ post.prenom }}" required/>
+            </label>
+        </div>
+        <div class="champ">
+            <label>
+                Email :
+                <input type="email" name="email" id="email" value="{{ post.email }}" required/>
+            </label>
+        </div>
+        <div class="champ">
+            <label>
+                Mot de passe :
+                <input type="password" name="mdp" id="mdp" minlength="8" required/>
+            </label>
+        </div>
+        <div class="champ">
+            <label>
+                Confirmez le mot de passe :
+                <input type="password" name="mdp2" id="mdp2" minlength="8" required/>
+            </label>
+        </div>
+        <button class="boutonValider">Valider l'inscription</button>
+    </form>
+{% endblock %}

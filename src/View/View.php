@@ -10,7 +10,7 @@ use Twig\Extension\CoreExtension;
 use Twig\Loader\FilesystemLoader;
 
 abstract class View {
-    const LISTE_BLOCKS = ["header", "footer", "banniere", "menuGauche", "menuDroite", "contenu", "pied2page"];
+    const LISTE_BLOCKS = ["header", "footer", "banniere", "menuGauche", "menuDroite", "contenu", "piedDePage"];
     protected Environment $twig;
     private array $scriptsTwig = [];
     private array $stylesTwig = [];
@@ -29,6 +29,8 @@ abstract class View {
         $this->twig->addExtension(new TwigFunctions());
         $this->twig->getExtension(CoreExtension::class)
                    ->setNumberFormat(2, ',', ' ');
+        $this->setTemplate('banniere', 'banniere.twig', 'banniere');
+        $this->setTemplate('piedDePage', 'piedDePage.twig', 'piedDePage');
     }
 
     public function render(): void {

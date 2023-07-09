@@ -13,7 +13,7 @@ class Mailer {
     private const ID_TEMPLATE_INSCRIPTION = 2;
     private TransactionalEmailsApi $api;
 
-    private function __construct() {
+    public function __construct() {
         $credentials = Configuration::getDefaultConfiguration()->setApiKey('api-key', BREVO_MAIL_API_KEY);
         $this->api = new TransactionalEmailsApi(new Client(), $credentials);
     }
@@ -42,7 +42,7 @@ class Mailer {
         $sendSmtpEmail['templateId'] = self::ID_TEMPLATE_INSCRIPTION;
         $sendSmtpEmail['params'] = [
             'nom' => $nom,
-            'host' => 'https://tucreusesou.localhost/',
+            'host' => 'https://tucreusesou.localhost',
             'code' => $code
         ];
 

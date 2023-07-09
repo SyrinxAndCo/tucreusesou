@@ -15,7 +15,7 @@ class IndexController extends Controller {
         $this->view->render();
     }
 
-    public function getMessageErreur(): string {
+    protected function getMessageErreur(string $code): string {
         return '';
     }
 }

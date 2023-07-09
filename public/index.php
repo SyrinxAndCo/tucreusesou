@@ -9,6 +9,12 @@ include_once '../config.php';
 
 $requestUri = $_SERVER['REQUEST_URI'];
 
+if (!session_start()) {
+    echo "Quelque chose s'est très mal passé...";
+    http_response_code(500);
+    die;
+}
+
 $controllersFiles = scandir('../src/Controller');
 $controllers = [];
 foreach ($controllersFiles as $controller) {

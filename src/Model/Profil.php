@@ -208,6 +208,25 @@ class Profil extends Model {
     }
 
     /**
+     * Vérifie si une inscription est déjà en cours avec le mail passé en paramètre
+     * @param string $mail
+     * @return bool
+     */
+    public static function mailDejaPris(string $mail): bool {
+        $query = self::getDB()->prepare('SELECT EXISTS(SELECT 1 FROM ' . self::TABLE . ' WHERE mail = :mail)');
+        if ($query) {
+            if ($query->execute(['mail' => $mail])) {
+                $inscription = $query->fetch();
+                if ($inscription) {
+                    return $inscription[0];
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * @return ?int
      */
     public function getId(): ?int {

@@ -31,5 +31,5 @@ abstract class Controller {
         }
     }
 
-    abstract public function getMessageErreur(): string;
+    abstract protected function getMessageErreur(string $code): string;
 }
