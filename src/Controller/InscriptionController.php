@@ -2,8 +2,8 @@
 
 namespace TuCreusesOu\Controller;
 
-use TuCreusesOu\Helper\InscriptionCodeInconnuException;
-use TuCreusesOu\Helper\InscriptionDelaiException;
+use TuCreusesOu\Exceptions\InscriptionCodeInconnuException;
+use TuCreusesOu\Exceptions\InscriptionDelaiException;
 use TuCreusesOu\Helper\Mailer;
 use TuCreusesOu\Model\Inscription;
 use TuCreusesOu\Model\Profil;

@@ -2,8 +2,8 @@
 
 namespace TuCreusesOu\Model;
 
-use TuCreusesOu\Helper\InscriptionCodeInconnuException;
-use TuCreusesOu\Helper\InscriptionDelaiException;
+use TuCreusesOu\Exceptions\InscriptionCodeInconnuException;
+use TuCreusesOu\Exceptions\InscriptionDelaiException;
 
 class Inscription extends Model {
     private const TABLE = 'inscription';
