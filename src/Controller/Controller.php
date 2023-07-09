@@ -5,6 +5,7 @@ namespace TuCreusesOu\Controller;
 use TuCreusesOu\View\View;
 
 abstract class Controller {
+    public const REGEX_EMAIL = '/^[\w\-.]+@([\w\-]+\.)+[\w\-]{2,4}$/';
 
     protected View $view;
 

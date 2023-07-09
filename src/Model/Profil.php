@@ -58,6 +58,25 @@ class Profil extends Model {
     }
 
     /**
+     * Récupère en BDD le profil correspondant au mail passé en paramètre
+     * @param string $mail
+     * @return Profil|null
+     */
+    public static function getProfilParMail(string $mail): ?Profil {
+        $query = self::getDB()->prepare('SELECT id FROM ' . self::TABLE . ' WHERE mail = :mail');
+        if ($query) {
+            if ($query->execute(['mail' => $mail])) {
+                $res = $query->fetch();
+                if ($res) {
+                    return self::getProfilParId($res['id']);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Sauvegarde le profil en BDD
      * @return bool
      */
@@ -216,9 +235,9 @@ class Profil extends Model {
         $query = self::getDB()->prepare('SELECT EXISTS(SELECT 1 FROM ' . self::TABLE . ' WHERE mail = :mail)');
         if ($query) {
             if ($query->execute(['mail' => $mail])) {
-                $inscription = $query->fetch();
-                if ($inscription) {
-                    return $inscription[0];
+                $res = $query->fetch();
+                if ($res) {
+                    return $res[0];
                 }
             }
         }

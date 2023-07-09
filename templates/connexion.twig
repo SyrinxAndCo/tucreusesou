@@ -1,0 +1,25 @@
+{% block connexion %}
+    <div class="connexion">
+        {% if erreur %}
+            <div class="erreur">
+                {{ erreur }}
+            </div>
+        {% endif %}
+        <form id="connexion" action="/index/post" method="post">
+            <input type="hidden" name="token" id="token" value="{{ token }}">
+            <div class="champ">
+                <label>
+                    Email :
+                    <input type="email" name="email" id="email" required>
+                </label>
+            </div>
+            <div class="champ">
+                <label>
+                    Mot de passe :
+                    <input type="password" name="mdp" id="mdp" required>
+                </label>
+            </div>
+            <button class="boutonValider">Se connecter</button>
+        </form>
+    </div>
+{% endblock %}

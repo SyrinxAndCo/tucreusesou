@@ -70,7 +70,7 @@ class InscriptionController extends Controller {
             $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = self::ERREUR_MOT_DE_PASSE_DIFFERENT;
             $this->redirect('/inscription');
         }
-        if (!preg_match('/^[\w\-.]+@([\w\-]+\.)+[\w\-]{2,4}$/', $_POST['email'])) {
+        if (!preg_match(Controller::REGEX_EMAIL, $_POST['email'])) {
             $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = self::ERREUR_EMAIL_INVALIDE;
             $this->redirect('/inscription');
         }
