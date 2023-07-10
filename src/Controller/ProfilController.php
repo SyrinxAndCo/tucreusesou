@@ -7,18 +7,23 @@ use TuCreusesOu\View\ProfilView;
 
 class ProfilController extends Controller {
 
-    public function __construct() {
-        $this->view = new ProfilView();
-        parent::__construct();
+    public function __construct(?ProfilView $view) {
+        parent::__construct($view ?? new ProfilView());
     }
 
     public function indexAction(): void {
-        // TODO: Implement indexAction() method.
-    }
-
-    public function eleonoreAction(): void {
-        $profil = Profil::getProfilParId(1);
-        $this->view->renderProfil($profil);
+        if (!isset($_SESSION['profil'])) {
+            $this->redirect('/');
+        }
+        $this->view->setTemplate(
+            'contenu',
+            'profil.twig',
+            'profil',
+            [
+                'profil' => $_SESSION['profil']
+            ]
+        );
+        $this->view->render();
     }
 
     protected function getMessageErreur(string $code): string {

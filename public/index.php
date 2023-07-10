@@ -3,6 +3,7 @@
 
 use TuCreusesOu\Controller\Controller;
 use TuCreusesOu\Controller\IndexController;
+use TuCreusesOu\View\IndexView;
 
 include_once '../vendor/autoload.php';
 include_once '../config.php';
@@ -23,12 +24,20 @@ foreach ($controllersFiles as $controller) {
         $controllers[strtolower($controllerName)] = '\TuCreusesOu\Controller\\' . $controllerName . 'Controller';
     }
 }
+$viewsFiles = scandir('../src/View');
+$views = [];
+foreach ($viewsFiles as $view) {
+    if (strpos($view, 'View.php') > 0) {
+        $viewName = str_replace('View.php', '', $view);
+        $views[strtolower($viewName)] = '\TuCreusesOu\View\\' . $viewName . 'View';
+    }
+}
 $request = explode('/', explode('#', explode('?', $requestUri)[0])[0]);
-if (array_key_exists($request[1], $controllers)) {
+if (array_key_exists($request[1], $controllers) && array_key_exists($request[1], $views)) {
     /**
      * @var Controller $controller
      */
-    $controller = new $controllers[$request[1]]();
+    $controller = new $controllers[$request[1]](new $views[$request[1]]());
     if (count($request) > 2) {
         $methodName = $request[2] . 'Action';
         if (method_exists($controller, $methodName)) {
@@ -43,6 +52,6 @@ if (array_key_exists($request[1], $controllers)) {
         $controller->indexAction();
     }
 } else {
-    $controller = new IndexController();
+    $controller = new IndexController(new IndexView());
     $controller->indexAction();
 }

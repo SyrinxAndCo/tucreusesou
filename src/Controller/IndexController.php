@@ -14,9 +14,11 @@ class IndexController extends Controller {
     private const ERREUR_EMAIL_INCONNU = 3;
     private const ERREUR_MAUVAIS_MDP = 4;
 
-    public function __construct() {
-        $this->view = new IndexView();
-        parent::__construct();
+    public function __construct(?IndexView $view) {
+        if (isset($_SESSION['profil'])) {
+            $this->redirect('/profil');
+        }
+        parent::__construct($view ?? new IndexView());
     }
 
     /**
@@ -25,17 +27,20 @@ class IndexController extends Controller {
      */
     public function indexAction(): void {
         $_SESSION[self::NOM_SESSION_TOKEN_CONNEXION] = uniqid();
-        if (!isset($_SESSION[self::NOM_SESSION_ERREUR_CONNEXION])) {
-            $this->view->renderConnexion(
-                $_SESSION[self::NOM_SESSION_TOKEN_CONNEXION]
-            );
-        } else {
-            $this->view->renderConnexion(
-                $_SESSION[self::NOM_SESSION_TOKEN_CONNEXION],
-                $this->getMessageErreur($_SESSION[self::NOM_SESSION_ERREUR_CONNEXION])
-            );
+        $paramsView = [
+            'token' => $_SESSION[self::NOM_SESSION_TOKEN_CONNEXION]
+        ];
+        if (isset($_SESSION[self::NOM_SESSION_ERREUR_CONNEXION])) {
+            $paramsView['erreur'] = $this->getMessageErreur($_SESSION[self::NOM_SESSION_ERREUR_CONNEXION]);
             unset($_SESSION[self::NOM_SESSION_ERREUR_CONNEXION]);
         }
+        $this->view->setTemplate(
+            'contenu',
+            'connexion.twig',
+            'connexion',
+            $paramsView
+        );
+        $this->view->render();
     }
 
     public function postAction(): void {

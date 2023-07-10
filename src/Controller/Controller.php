@@ -9,7 +9,8 @@ abstract class Controller {
 
     protected View $view;
 
-    protected function __construct() {
+    protected function __construct(View $view) {
+        $this->view = $view;
     }
 
     abstract public function indexAction(): void;

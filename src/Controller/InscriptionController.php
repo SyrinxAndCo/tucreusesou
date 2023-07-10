@@ -25,10 +25,13 @@ class InscriptionController extends Controller {
     private const ERREUR_CODE_EMAIL_GENERIQUE = 9;
     private const ERREUR_MAIL_DEJA_PRIS = 10;
     private const ERREUR_MDP_TROP_COURT = 11;
+    private const ERREUR_INSCRIPTION_GENERIQUE = 12;
 
-    public function __construct() {
-        $this->view = new InscriptionView();
-        parent::__construct();
+    public function __construct(?InscriptionView $view) {
+        if (isset($_SESSION['profil'])) {
+            $this->redirect('/profil');
+        }
+        parent::__construct($view ?? new InscriptionView());
     }
 
     /**
@@ -37,19 +40,20 @@ class InscriptionController extends Controller {
      */
     public function indexAction(): void {
         $_SESSION[self::NOM_SESSION_TOKEN_INSCRIPTION] = uniqid();
-        if (!isset($_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION])) {
-            $this->view->renderIndex(
-                $_SESSION[self::NOM_SESSION_TOKEN_INSCRIPTION]
-            );
-        } else {
-            $this->view->renderIndex(
-                $_SESSION[self::NOM_SESSION_TOKEN_INSCRIPTION],
-                $this->getMessageErreur($_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION]),
-                $_SESSION[self::NOM_SESSION_POST_INSCRIPTION] ?? []
-            );
+        $paramsView = ['token' => $_SESSION[self::NOM_SESSION_TOKEN_INSCRIPTION]];
+        if (isset($_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION])) {
+            $paramsView['erreur'] = $this->getMessageErreur($_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION]);
+            $paramsView['post'] = $_SESSION[self::NOM_SESSION_POST_INSCRIPTION] ?? [];
             unset($_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION]);
             unset($_SESSION[self::NOM_SESSION_POST_INSCRIPTION]);
         }
+        $this->view->setTemplate(
+            'contenu',
+            'inscription/index.twig',
+            'inscriptionFormulaire',
+            $paramsView
+        );
+        $this->view->render();
     }
 
     /**
@@ -94,8 +98,13 @@ class InscriptionController extends Controller {
         unset($_SESSION[self::NOM_SESSION_TOKEN_INSCRIPTION]);
         $inscription = new Inscription($_POST['nom'], $_POST['prenom'], password_hash($_POST['mdp'],  PASSWORD_DEFAULT), $_POST['email']);
         $code = $inscription->sauvegarde();
-        $mailer = new Mailer();
-        $mailer->envoieMailInscription($inscription->getPrenom() . ' ' . $inscription->getNom(), $inscription->getMail(), $code);
+        if ($code) {
+            $mailer = new Mailer();
+            $mailer->envoieMailInscription($inscription->getPrenom() . ' ' . $inscription->getNom(), $inscription->getMail(), $code);
+        } else {
+            $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = self::ERREUR_INSCRIPTION_GENERIQUE;
+            $this->redirect('/inscription');
+        }
 
         $this->redirect('/inscription/validation');
     }
@@ -105,7 +114,12 @@ class InscriptionController extends Controller {
      * @return void
      */
     public function validationAction(): void {
-        $this->view->renderValidation();
+        $this->view->setTemplate(
+            'contenu',
+            'inscription/validation.twig',
+            'inscriptionValidation'
+        );
+        $this->view->render();
     }
 
     /**
@@ -123,7 +137,12 @@ class InscriptionController extends Controller {
                 $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = self::ERREUR_CODE_EMAIL_GENERIQUE;
                 $this->redirect('/inscription');
             }
-            $this->view->renderEmailValidation();
+            $this->view->setTemplate(
+                'contenu',
+                'inscription/email.twig',
+                'inscriptionEmailValidation'
+            );
+            $this->view->render();
         } catch(InscriptionDelaiException $_) {
             $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = self::ERREUR_CODE_EMAIL_DELAI_DEPASSE;
             $this->redirect('/inscription');
@@ -159,6 +178,8 @@ class InscriptionController extends Controller {
                 return "Ce mail est déjà pris, vous avez donc sans doute déjà un compte actif ou une inscription en attente. Si tel n'est pas le cas, veuillez contacter l'administratrice du site.";
             case self::ERREUR_MDP_TROP_COURT:
                 return "Je sais, c'est ennuyant... Mais il faut bien au moins 8 caractères pour votre mot de passe.";
+            case self::ERREUR_INSCRIPTION_GENERIQUE:
+                return "Quelque chose s'est très mal passé... Veuillez réessayer ou contacter l'administratrice du site.";
             default:
                 return "";
         }
