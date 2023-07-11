@@ -2,17 +2,14 @@
 
 namespace TuCreusesOu\Controller;
 
+use TuCreusesOu\Enum\Erreurs;
+use TuCreusesOu\Enum\ViewBlocks;
 use TuCreusesOu\Model\Profil;
 use TuCreusesOu\View\IndexView;
 
 class IndexController extends Controller {
     private const NOM_SESSION_TOKEN_CONNEXION = 'tokenConnexion';
     private const NOM_SESSION_ERREUR_CONNEXION = 'erreurConnexion';
-    private const ERREUR_FORMULAIRE_NON_VALIDE = 0;
-    private const ERREUR_EMAIL_INVALIDE = 1;
-    private const ERREUR_CHAMP_MANQUANT = 2;
-    private const ERREUR_EMAIL_INCONNU = 3;
-    private const ERREUR_MAUVAIS_MDP = 4;
 
     public function __construct(?IndexView $view) {
         if (isset($_SESSION['profil'])) {
@@ -35,7 +32,7 @@ class IndexController extends Controller {
             unset($_SESSION[self::NOM_SESSION_ERREUR_CONNEXION]);
         }
         $this->view->setTemplate(
-            'contenu',
+            ViewBlocks::CONTENU,
             'connexion.twig',
             'connexion',
             $paramsView
@@ -45,43 +42,37 @@ class IndexController extends Controller {
 
     public function postAction(): void {
         if (!isset($_POST['token']) || !isset($_SESSION[self::NOM_SESSION_TOKEN_CONNEXION]) || $_POST['token'] !== $_SESSION[self::NOM_SESSION_TOKEN_CONNEXION]) {
-            $_SESSION[self::NOM_SESSION_ERREUR_CONNEXION] = self::ERREUR_FORMULAIRE_NON_VALIDE;
+            $_SESSION[self::NOM_SESSION_ERREUR_CONNEXION] = Erreurs::FORMULAIRE_NON_VALIDE;
             $this->redirect('/');
         }
         if (!isset($_POST['email']) || !isset($_POST['mdp'])) {
-            $_SESSION[self::NOM_SESSION_ERREUR_CONNEXION] = self::ERREUR_CHAMP_MANQUANT;
+            $_SESSION[self::NOM_SESSION_ERREUR_CONNEXION] = Erreurs::CHAMP_MANQUANT;
             $this->redirect('/');
         }
         if (!preg_match(Controller::REGEX_EMAIL, $_POST['email'])) {
-            $_SESSION[self::NOM_SESSION_ERREUR_CONNEXION] = self::ERREUR_EMAIL_INVALIDE;
+            $_SESSION[self::NOM_SESSION_ERREUR_CONNEXION] = Erreurs::EMAIL_INVALIDE;
             $this->redirect('/');
         }
         $profil = Profil::getProfilParMail($_POST['email']);
         if ($profil === null) {
-            $_SESSION[self::NOM_SESSION_ERREUR_CONNEXION] = self::ERREUR_EMAIL_INCONNU;
+            $_SESSION[self::NOM_SESSION_ERREUR_CONNEXION] = Erreurs::EMAIL_INCONNU;
             $this->redirect('/');
         }
         if (!password_verify($_POST['mdp'], $profil->getMdp())) {
-            $_SESSION[self::NOM_SESSION_ERREUR_CONNEXION] = self::ERREUR_MAUVAIS_MDP;
+            $_SESSION[self::NOM_SESSION_ERREUR_CONNEXION] = Erreurs::MAUVAIS_MDP;
             $this->redirect('/');
         }
         $_SESSION['profil'] = $profil;
         $this->redirect('/profil');
     }
 
-    protected function getMessageErreur(string $code): string {
-        switch($code) {
-            case self::ERREUR_FORMULAIRE_NON_VALIDE:
-                return "Votre formulaire de connexion était invalide, veuillez réessayer.";
-            case self::ERREUR_EMAIL_INVALIDE:
-                return "L'email de connexion fourni est invalide.";
-            case self::ERREUR_CHAMP_MANQUANT:
-                return "Il manque un champ requis dans votre formulaire de connexion.";
-            case self::ERREUR_EMAIL_INCONNU:
-            case self::ERREUR_MAUVAIS_MDP:
-                return "La combinaison EMail/Mot de passe est inconnue.";
-            default:
-                return "";
-        }
+    protected function getMessageErreur(Erreurs $erreur): string {
+        return match ($erreur) {
+            Erreurs::FORMULAIRE_NON_VALIDE => "Votre formulaire de connexion était invalide, veuillez réessayer.",
+            Erreurs::EMAIL_INVALIDE => "L'email de connexion fourni est invalide.",
+            Erreurs::CHAMP_MANQUANT => "Il manque un champ requis dans votre formulaire de connexion.",
+            Erreurs::EMAIL_INCONNU, Erreurs::MAUVAIS_MDP => "La combinaison EMail/Mot de passe est inconnue.",
+            default => "",
+        };
     }
 }

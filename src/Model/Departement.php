@@ -94,4 +94,12 @@ class Departement extends Model {
     public function setNom(string $nom): void {
         $this->nom = $nom;
     }
+
+    /**
+     * Visualisation du département sous forme de chaine de caractères
+     * @return string
+     */
+    public function __toString(): string {
+        return $this->numero . ' - ' . $this->nom;
+    }
 }

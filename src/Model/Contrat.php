@@ -62,7 +62,9 @@ class Contrat extends Model {
         if ($query) {
             if ($query->execute([$cle => $valeur])) {
                 $res = $query->fetch();
-                return new Contrat($res['idProfil'], $res['dateDebut'], $res['dateFin'], new Departement($res['idDepartement'], $res['numeroDepartement'], $res['nomDepartement']), $res['enActivite'], $res['id']);
+                if ($res) {
+                    return new Contrat($res['idProfil'], $res['dateDebut'], $res['dateFin'], new Departement($res['idDepartement'], $res['numeroDepartement'], $res['nomDepartement']), $res['enActivite'], $res['id']);
+                }
             }
         }
         return null;

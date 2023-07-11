@@ -2,15 +2,16 @@
 
 namespace TuCreusesOu\View;
 
+use TuCreusesOu\Enum\ViewBlocks;
 use TuCreusesOu\TwigExtension\TwigFunctions;
 use TuCreusesOu\TwigExtension\TwigFilters;
 use Twig\Environment;
 use Twig\Error\Error;
 use Twig\Extension\CoreExtension;
+use Twig\Extra\Intl\IntlExtension;
 use Twig\Loader\FilesystemLoader;
 
 abstract class View {
-    const LISTE_BLOCKS = ["header", "footer", "banniere", "menuGauche", "menuDroite", "contenu", "piedDePage"];
     protected Environment $twig;
     private array $scriptsTwig = [];
     private array $stylesTwig = [];
@@ -29,8 +30,9 @@ abstract class View {
         $this->twig->addExtension(new TwigFunctions());
         $this->twig->getExtension(CoreExtension::class)
                    ->setNumberFormat(2, ',', ' ');
-        $this->setTemplate('banniere', 'banniere.twig', 'banniere');
-        $this->setTemplate('piedDePage', 'piedDePage.twig', 'piedDePage');
+        $this->twig->addExtension(new IntlExtension());
+        $this->setTemplate(ViewBlocks::BANNIERE, 'banniere.twig', 'banniere');
+        $this->setTemplate(ViewBlocks::PIED_DE_PAGE, 'piedDePage.twig', 'piedDePage');
     }
 
     public function render(): void {
@@ -74,7 +76,7 @@ abstract class View {
      * @return void
      */
     public function ajouteStyle(string $path): void {
-        $this->styles[] = (strpos($path, '/') === 0 ? '' : '/styles/') . $path;
+        $this->styles[] = (str_starts_with($path, '/') ? '' : '/styles/') . $path;
     }
 
     /**
@@ -83,7 +85,7 @@ abstract class View {
      * @return void
      */
     public function ajouteScript(string $path): void {
-        $this->scripts[] = (strpos($path, '/') === 0 ? '' : '/scripts/') . $path;
+        $this->scripts[] = (str_starts_with($path, '/') ? '' : '/scripts/') . $path;
     }
 
     /**
@@ -94,22 +96,18 @@ abstract class View {
     }
 
     /**
-     * @param string $blockName Nom du bloc à écraser
+     * @param ViewBlocks $blockName Nom du bloc à écraser
      * @param string $twigFile Fichier twig d'où sortir le block
      * @param string $blockNameInFile Nom du bloc dans le fichier twig
      * @param array $params Paramètres du bloc
      * @return void
      */
-    public function setTemplate(string $blockName, string $twigFile, string $blockNameInFile, array $params = []): void {
-        if (in_array($blockName, self::LISTE_BLOCKS)) {
-            $this->blocks[$blockName] = [
-                'file' => $twigFile,
-                'blockName' => $blockNameInFile,
-                'params' => $params
-            ];
-        } else {
-            throw new \Error("Le block " . $blockName . " n'existe pas dans le template de base");
-        }
+    public function setTemplate(ViewBlocks $blockName, string $twigFile, string $blockNameInFile, array $params = []): void {
+        $this->blocks[$blockName->value] = [
+            'file' => $twigFile,
+            'blockName' => $blockNameInFile,
+            'params' => $params
+        ];
     }
 
     /**
@@ -147,7 +145,7 @@ abstract class View {
      * @param string $param attribut
      * @param string $val Valeur de l'attribut
      */
-    public function ajouteParam(string $param, string $val) {
+    public function ajouteParam(string $param, string $val): void {
         $this->bodyParams[] = $param . '="' . $val . '"';
     }
 
@@ -156,7 +154,7 @@ abstract class View {
      * @param string $action
      * @return void
      */
-    public function ajouteOnLoad(string $action) {
+    public function ajouteOnLoad(string $action): void {
         $this->onLoad .= ';' . $action;
     }
 }

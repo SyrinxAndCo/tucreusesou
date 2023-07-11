@@ -2,6 +2,8 @@
 
 namespace TuCreusesOu\Controller;
 
+use TuCreusesOu\Enum\Erreurs;
+use TuCreusesOu\Enum\ViewBlocks;
 use TuCreusesOu\Exceptions\InscriptionCodeInconnuException;
 use TuCreusesOu\Exceptions\InscriptionDelaiException;
 use TuCreusesOu\Helper\Mailer;
@@ -13,19 +15,6 @@ class InscriptionController extends Controller {
     private const NOM_SESSION_TOKEN_INSCRIPTION = 'tokenInscription';
     private const NOM_SESSION_ERREUR_INSCRIPTION = 'erreurInscription';
     private const NOM_SESSION_POST_INSCRIPTION = 'postInscription';
-    private const ERREUR_FORMULAIRE_NON_VALIDE = 0;
-    private const ERREUR_CHAMP_MANQUANT = 1;
-    private const ERREUR_MOT_DE_PASSE_DIFFERENT = 2;
-    private const ERREUR_EMAIL_INVALIDE = 3;
-    private const ERREUR_CARACTERES_INTERDITS = 4;
-    private const ERREUR_MDP_INTERDIT = 5;
-    private const ERREUR_CODE_EMAIL_MANQUANT = 6;
-    private const ERREUR_CODE_EMAIL_DELAI_DEPASSE = 7;
-    private const ERREUR_CODE_EMAIL_INCONNU = 8;
-    private const ERREUR_CODE_EMAIL_GENERIQUE = 9;
-    private const ERREUR_MAIL_DEJA_PRIS = 10;
-    private const ERREUR_MDP_TROP_COURT = 11;
-    private const ERREUR_INSCRIPTION_GENERIQUE = 12;
 
     public function __construct(?InscriptionView $view) {
         if (isset($_SESSION['profil'])) {
@@ -48,7 +37,7 @@ class InscriptionController extends Controller {
             unset($_SESSION[self::NOM_SESSION_POST_INSCRIPTION]);
         }
         $this->view->setTemplate(
-            'contenu',
+            ViewBlocks::CONTENU,
             'inscription/index.twig',
             'inscriptionFormulaire',
             $paramsView
@@ -63,35 +52,35 @@ class InscriptionController extends Controller {
     public function postAction(): void {
         $_SESSION[self::NOM_SESSION_POST_INSCRIPTION] = $_POST;
         if (!isset($_POST['token']) || !isset($_SESSION[self::NOM_SESSION_TOKEN_INSCRIPTION]) || $_POST['token'] !== $_SESSION[self::NOM_SESSION_TOKEN_INSCRIPTION]) {
-            $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = self::ERREUR_FORMULAIRE_NON_VALIDE;
+            $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = Erreurs::FORMULAIRE_NON_VALIDE;
             $this->redirect('/inscription');
         }
         if (!isset($_POST['nom']) || !isset($_POST['prenom']) || !isset($_POST['email']) || !isset($_POST['mdp']) || !isset($_POST['mdp2'])) {
-            $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = self::ERREUR_CHAMP_MANQUANT;
+            $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = Erreurs::CHAMP_MANQUANT;
             $this->redirect('/inscription');
         }
         if ($_POST['mdp'] !== $_POST['mdp2']) {
-            $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = self::ERREUR_MOT_DE_PASSE_DIFFERENT;
+            $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = Erreurs::MOT_DE_PASSE_DIFFERENT;
             $this->redirect('/inscription');
         }
         if (!preg_match(Controller::REGEX_EMAIL, $_POST['email'])) {
-            $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = self::ERREUR_EMAIL_INVALIDE;
+            $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = Erreurs::EMAIL_INVALIDE;
             $this->redirect('/inscription');
         }
         if (!preg_match('/^[a-zA-ZÀ-ÿ\-. ]*$/', $_POST['nom']) || !preg_match('/^[a-zA-ZÀ-ÿ\-. ]*$/', $_POST['prenom'])) {
-            $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = self::ERREUR_CARACTERES_INTERDITS;
+            $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = Erreurs::CARACTERES_INTERDITS;
             $this->redirect('/inscription');
         }
         if (!preg_match('/^[a-zA-ZÀ-ÿ\-. ,!*\/+#?%$£^¨°_|&]*$/', $_POST['mdp'])) {
-            $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = self::ERREUR_MDP_INTERDIT;
+            $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = Erreurs::MDP_INTERDIT;
             $this->redirect('/inscription');
         }
         if (strlen($_POST['mdp']) < 8) {
-            $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = self::ERREUR_MDP_TROP_COURT;
+            $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = Erreurs::MDP_TROP_COURT;
             $this->redirect('/inscription');
         }
         if (Inscription::mailDejaPris($_POST['email']) || Profil::mailDejaPris($_POST['email'])) {
-            $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = self::ERREUR_MAIL_DEJA_PRIS;
+            $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = Erreurs::MAIL_DEJA_PRIS;
             $this->redirect('/inscription');
         }
         unset($_SESSION[self::NOM_SESSION_POST_INSCRIPTION]);
@@ -102,7 +91,7 @@ class InscriptionController extends Controller {
             $mailer = new Mailer();
             $mailer->envoieMailInscription($inscription->getPrenom() . ' ' . $inscription->getNom(), $inscription->getMail(), $code);
         } else {
-            $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = self::ERREUR_INSCRIPTION_GENERIQUE;
+            $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = Erreurs::INSCRIPTION_GENERIQUE;
             $this->redirect('/inscription');
         }
 
@@ -115,7 +104,7 @@ class InscriptionController extends Controller {
      */
     public function validationAction(): void {
         $this->view->setTemplate(
-            'contenu',
+            ViewBlocks::CONTENU,
             'inscription/validation.twig',
             'inscriptionValidation'
         );
@@ -129,59 +118,45 @@ class InscriptionController extends Controller {
      */
     public function validermailAction(?string $code = null): void {
         if (!$code) {
-            $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = self::ERREUR_CODE_EMAIL_MANQUANT;
+            $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = Erreurs::CODE_EMAIL_MANQUANT;
             $this->redirect('/inscription');
         }
         try {
             if (!Inscription::valideInscription($code)) {
-                $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = self::ERREUR_CODE_EMAIL_GENERIQUE;
+                $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = Erreurs::CODE_EMAIL_GENERIQUE;
                 $this->redirect('/inscription');
             }
             $this->view->setTemplate(
-                'contenu',
+                ViewBlocks::CONTENU,
                 'inscription/email.twig',
                 'inscriptionEmailValidation'
             );
             $this->view->render();
         } catch(InscriptionDelaiException $_) {
-            $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = self::ERREUR_CODE_EMAIL_DELAI_DEPASSE;
+            $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = Erreurs::CODE_EMAIL_DELAI_DEPASSE;
             $this->redirect('/inscription');
         } catch(InscriptionCodeInconnuException $_) {
-            $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = self::ERREUR_CODE_EMAIL_INCONNU;
+            $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = Erreurs::CODE_EMAIL_INCONNU;
             $this->redirect('/inscription');
         }
     }
 
-    protected function getMessageErreur(string $code): string {
-        switch ($code) {
-            case self::ERREUR_FORMULAIRE_NON_VALIDE:
-                return "Votre formulaire d'inscription était non valide, veuillez réessayer.";
-            case self::ERREUR_CHAMP_MANQUANT:
-                return "Il manque un champ requis dans votre formulaire.";
-            case self::ERREUR_MOT_DE_PASSE_DIFFERENT:
-                return "Le mot de passe entré en vérification est différent du mot de passe donné.";
-            case self::ERREUR_EMAIL_INVALIDE:
-                return "L'email fourni est invalide.";
-            case self::ERREUR_CARACTERES_INTERDITS:
-                return "Votre nom ou votre prénom contiennent des caractères interdits. Si ces caractères sont légitimes, veuillez contacter l'administratrice du site en donnant vos noms et prénoms afin d'ouvrir la possibilité d'utiliser les caractères manquants. Les mesures de sécurité sont parfois un peu ennuyantes, veuillez nous excuser.";
-            case self::ERREUR_MDP_INTERDIT:
-                return "Votre mot de passe contient des caractères interdits.";
-            case self::ERREUR_CODE_EMAIL_MANQUANT:
-                return "Il manque le code de validation de votre email.";
-            case self::ERREUR_CODE_EMAIL_DELAI_DEPASSE:
-                return "Le délai de validation de votre inscription a été dépassée, veuillez renouveler votre inscription.";
-            case self::ERREUR_CODE_EMAIL_INCONNU:
-                return "Le code de validation de votre mail est inconnu.";
-            case self::ERREUR_CODE_EMAIL_GENERIQUE:
-                return "Quelque chose s'est mal passé durant la validation de votre adresse mail, veuillez réessayer.";
-            case self::ERREUR_MAIL_DEJA_PRIS:
-                return "Ce mail est déjà pris, vous avez donc sans doute déjà un compte actif ou une inscription en attente. Si tel n'est pas le cas, veuillez contacter l'administratrice du site.";
-            case self::ERREUR_MDP_TROP_COURT:
-                return "Je sais, c'est ennuyant... Mais il faut bien au moins 8 caractères pour votre mot de passe.";
-            case self::ERREUR_INSCRIPTION_GENERIQUE:
-                return "Quelque chose s'est très mal passé... Veuillez réessayer ou contacter l'administratrice du site.";
-            default:
-                return "";
-        }
+    protected function getMessageErreur(Erreurs $erreur): string {
+        return match ($erreur) {
+            Erreurs::FORMULAIRE_NON_VALIDE => "Votre formulaire d'inscription était non valide, veuillez réessayer.",
+            Erreurs::CHAMP_MANQUANT => "Il manque un champ requis dans votre formulaire.",
+            Erreurs::MOT_DE_PASSE_DIFFERENT => "Le mot de passe entré en vérification est différent du mot de passe donné.",
+            Erreurs::EMAIL_INVALIDE => "L'email fourni est invalide.",
+            Erreurs::CARACTERES_INTERDITS => "Votre nom ou votre prénom contiennent des caractères interdits. Si ces caractères sont légitimes, veuillez contacter l'administratrice du site en donnant vos noms et prénoms afin d'ouvrir la possibilité d'utiliser les caractères manquants. Les mesures de sécurité sont parfois un peu ennuyantes, veuillez nous excuser.",
+            Erreurs::MDP_INTERDIT => "Votre mot de passe contient des caractères interdits.",
+            Erreurs::CODE_EMAIL_MANQUANT => "Il manque le code de validation de votre email.",
+            Erreurs::CODE_EMAIL_DELAI_DEPASSE => "Le délai de validation de votre inscription a été dépassée, veuillez renouveler votre inscription.",
+            Erreurs::CODE_EMAIL_INCONNU => "Le code de validation de votre mail est inconnu.",
+            Erreurs::CODE_EMAIL_GENERIQUE => "Quelque chose s'est mal passé durant la validation de votre adresse mail, veuillez réessayer.",
+            Erreurs::MAIL_DEJA_PRIS => "Ce mail est déjà pris, vous avez donc sans doute déjà un compte actif ou une inscription en attente. Si tel n'est pas le cas, veuillez contacter l'administratrice du site.",
+            Erreurs::MDP_TROP_COURT => "Je sais, c'est ennuyant... Mais il faut bien au moins 8 caractères pour votre mot de passe.",
+            Erreurs::INSCRIPTION_GENERIQUE => "Quelque chose s'est très mal passé... Veuillez réessayer ou contacter l'administratrice du site.",
+            default => "",
+        };
     }
 }

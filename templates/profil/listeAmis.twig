@@ -1,0 +1,15 @@
+{% block listeAmis %}
+    <div class="listeAmis">
+        {% if erreur %}
+            <div class="erreur">
+                {{ erreur }}
+            </div>
+        {% endif %}
+        <form id="listeAmis" method="post" action="/profil/post">
+            {% for ami in listeAmis %}
+                {{ include('profil/carteAmi.twig', {ami: ami}, with_context = false) }}
+                <button name="supprimerAmi" value="{{ ami.id }}">Supprimer de la liste</button>
+            {% endfor %}
+        </form>
+    </div>
+{% endblock %}

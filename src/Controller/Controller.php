@@ -2,6 +2,7 @@
 
 namespace TuCreusesOu\Controller;
 
+use TuCreusesOu\Enum\Erreurs;
 use TuCreusesOu\View\View;
 
 abstract class Controller {
@@ -33,5 +34,5 @@ abstract class Controller {
         }
     }
 
-    abstract protected function getMessageErreur(string $code): string;
+    abstract protected function getMessageErreur(Erreurs $erreur): string;
 }

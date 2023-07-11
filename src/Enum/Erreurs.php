@@ -1,0 +1,22 @@
+<?php
+
+namespace TuCreusesOu\Enum;
+
+enum Erreurs {
+    case FORMULAIRE_NON_VALIDE;
+    case CHAMP_MANQUANT;
+    case MOT_DE_PASSE_DIFFERENT;
+    case EMAIL_INVALIDE;
+    case CARACTERES_INTERDITS;
+    case MDP_INTERDIT;
+    case CODE_EMAIL_MANQUANT;
+    case CODE_EMAIL_DELAI_DEPASSE;
+    case CODE_EMAIL_INCONNU;
+    case CODE_EMAIL_GENERIQUE;
+    case MAIL_DEJA_PRIS;
+    case MDP_TROP_COURT;
+    case INSCRIPTION_GENERIQUE;
+    case EMAIL_INCONNU;
+    case MAUVAIS_MDP;
+    case IDENTIFIANT_AMI_INCONNU;
+}

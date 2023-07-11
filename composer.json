@@ -16,7 +16,8 @@
     "require": {
         "twig/twig": "^3.6",
         "ext-pdo": "*",
-        "sendinblue/api-v3-sdk": "^8.4"
+        "sendinblue/api-v3-sdk": "^8.4",
+        "twig/intl-extra": "^3.6"
     },
     "platform": {
         "php": "8.2"

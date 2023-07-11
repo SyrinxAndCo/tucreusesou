@@ -1,0 +1,51 @@
+{% block profil %}
+    <div class="profil">
+        <div class="nomPrenom">
+            {{ profil.prenom }} {{ profil.nom }}
+        </div>
+        <div class="description">
+            <span class="titreDescription">Description :</span> {{ profil.description ?? 'Aucune description fournie' }}
+        </div>
+        <div class="contrat">
+            {% if profil.contrat %}
+                {% if profil.contrat.enactivite %}
+                    <div class="dateContrat">
+                        Date de début du contrat : {{ profil.contrat.dateDebut|date('D d F Y')|format_date('full', locale='fr') }}
+                    </div>
+                    <div class="dateContrat">
+                        Date de fin du contrat
+                        : {% if profil.contrat.dateFin %}{{ profil.contrat.dateFin|date('D d F Y')|format_date('full', locale='fr') }}{% else %}Pas de fin, il s'agit d'un CDI{% endif %}
+                    </div>
+                    <div class="departement">
+                        Département du contrat : {{ profil.contrat.departement }}
+                    </div>
+                {% else %}
+                    <div class="departement">
+                        Département de résidence ou de séjour : {{ profil.contrat.departement }}
+                    </div>
+                {% endif %}
+            {% else %}
+                Aucun contrat en cours
+            {% endif %}
+        </div>
+        <div class="liensProfil">
+            <button class="boutonLien">
+                <a href="/profil/editer">Éditer</a>
+            </button>
+            <button class="boutonLien">
+                <a href="/profil/listeAmis">Liste d'amis</a>
+            </button>
+            <button class="boutonLien">
+                <a href="/profil/supprimer">Supprimer</a>
+            </button>
+        </div>
+        <div class="sousTitre">
+            Liste de vos amis dans le même département :
+        </div>
+        <div class="amis">
+            {% for ami in profil.profilsAmis|filter(v => profil.estAmitie(v.id) and profil.contrat.departement.id == v.contrat.departement.id) %}
+                {{ include('profil/carteAmi.twig', {ami: ami}, with_context = false) }}
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

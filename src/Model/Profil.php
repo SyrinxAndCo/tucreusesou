@@ -12,6 +12,7 @@ class Profil extends Model {
     private string $mdp;
     private string $mail;
     private array $amis;
+    private ?Contrat $contrat;
 
     public function __construct(
         string  $nom,
@@ -20,6 +21,7 @@ class Profil extends Model {
         string  $mail,
         array   $amis,
         ?string $description = null,
+        ?Contrat $contrat = null,
         ?int     $id = null
     ) {
         $this->id = $id;
@@ -29,6 +31,7 @@ class Profil extends Model {
         $this->mdp = $mdp;
         $this->mail = $mail;
         $this->amis = $amis;
+        $this->contrat = $contrat;
         parent::__construct();
     }
 
@@ -49,7 +52,7 @@ class Profil extends Model {
                             $amis[] = $profil['idAmi'];
                         }
                     }
-                    return new Profil($profils[0]['nom'], $profils[0]['prenom'], $profils[0]['mdp'], $profils[0]['mail'], $amis, $profils[0]['description'], $profils[0]['id']);
+                    return new Profil($profils[0]['nom'], $profils[0]['prenom'], $profils[0]['mdp'], $profils[0]['mail'], $amis, $profils[0]['description'], Contrat::getContratParIdProfil($profils[0]['id']), $profils[0]['id']);
                 }
             }
         }
@@ -208,7 +211,7 @@ class Profil extends Model {
                     'idAmi2' => $this->id
                 ]
             )) {
-                return $query->fetch();
+                return $query->fetch()[0];
             }
         }
         return false;
@@ -341,5 +344,19 @@ class Profil extends Model {
      */
     public function setAmis(array $amis): void {
         $this->amis = $amis;
+    }
+
+    /**
+     * @return Contrat|null
+     */
+    public function getContrat(): ?Contrat {
+        return $this->contrat;
+    }
+
+    /**
+     * @param Contrat $contrat
+     */
+    public function setContrat(Contrat $contrat): void {
+        $this->contrat = $contrat;
     }
 }
