@@ -1,10 +1,6 @@
 {% block connexion %}
     <div class="connexion">
-        {% if erreur %}
-            <div class="erreur">
-                {{ erreur }}
-            </div>
-        {% endif %}
+        {{ include('blocs/erreur.twig', {erreur: erreur}, with_context = false) }}
         <form id="connexion" action="/index/post" method="post">
             <input type="hidden" name="token" id="token" value="{{ token }}">
             <div class="champ">

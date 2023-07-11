@@ -1,5 +1,6 @@
 {% block profil %}
     <div class="profil">
+        {{ include('blocs/erreur.twig', {erreur: erreur}, with_context = false) }}
         <div class="nomPrenom">
             {{ profil.prenom }} {{ profil.nom }}
         </div>
@@ -29,13 +30,13 @@
             {% endif %}
         </div>
         <div class="liensProfil">
-            <button class="boutonLien">
+            <button class="boutonLien" type="button">
                 <a href="/profil/editer">Éditer</a>
             </button>
-            <button class="boutonLien">
+            <button class="boutonLien" type="button">
                 <a href="/profil/listeAmis">Liste d'amis</a>
             </button>
-            <button class="boutonLien">
+            <button class="boutonLien" type="button">
                 <a href="/profil/supprimer">Supprimer</a>
             </button>
         </div>
@@ -45,6 +46,8 @@
         <div class="amis">
             {% for ami in profil.profilsAmis|filter(v => profil.estAmitie(v.id) and profil.contrat.departement.id == v.contrat.departement.id) %}
                 {{ include('profil/carteAmi.twig', {ami: ami}, with_context = false) }}
+                {% else %}
+                Il n'y a actuellement personne dans votre liste d'amis qui soit dans le même département que vous.
             {% endfor %}
         </div>
     </div>

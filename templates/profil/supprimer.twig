@@ -1,0 +1,22 @@
+{% block supprimerProfil %}
+    <div class="supprimerProfil">
+        {{ include('blocs/erreur.twig', {erreur: erreur}, with_context = false) }}
+        <div class="messageImportant">
+            <p>Vous êtes sur le point de supprimer votre profil sur Tu Creuses où ?</p>
+            <p>Cette action est irréversible et supprimera toutes les données liées à votre compte.</p>
+            <p>Si vous êtes sûr-e de votre choix, veuillez renseigner votre mot de passe et cliquer sur le bouton "Supprimer mon compte".</p>
+            <p>Sinon, vous pouvez revenir sur votre profil en cliquant sur le bouton "Annuler".</p>
+        </div>
+        <form id="supprimerProfil" method="post" action="/profil/post">
+            <input type="hidden" id="token" name="token" value="{{ token }}">
+            <div class="champ">
+                <label>
+                    Mot de passe :
+                    <input type="password" id="mdp" name="mdp">
+                </label>
+            </div>
+            <button name="supprimerProfil">Supprimer mon compte</button>
+            <button name="annuler" type="button"><a href="/profil">Annuler</a></button>
+        </form>
+    </div>
+{% endblock %}

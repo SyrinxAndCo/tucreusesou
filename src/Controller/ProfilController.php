@@ -9,6 +9,7 @@ use TuCreusesOu\View\ProfilView;
 
 class ProfilController extends Controller {
     private ?Profil $profil;
+    private array $paramsView = [];
     private const NOM_SESSION_TOKEN_PROFIL = 'tokenProfil';
     const NOM_SESSION_ERREUR_PROFIL = 'erreurProfil';
 
@@ -20,6 +21,10 @@ class ProfilController extends Controller {
         if ($this->profil === null) {
             $this->redirect('/');
         }
+        if (isset($_SESSION[self::NOM_SESSION_ERREUR_PROFIL])) {
+            $this->paramsView['erreur'] = $this->getMessageErreur($_SESSION[self::NOM_SESSION_ERREUR_PROFIL]);
+            unset($_SESSION[self::NOM_SESSION_ERREUR_PROFIL]);
+        }
         parent::__construct($view ?? new ProfilView());
     }
 
@@ -28,13 +33,12 @@ class ProfilController extends Controller {
      * @return void
      */
     public function indexAction(): void {
+        $this->paramsView['profil'] = $this->profil;
         $this->view->setTemplate(
             ViewBlocks::CONTENU,
             'profil/profil.twig',
             'profil',
-            [
-                'profil' => $this->profil
-            ]
+            $this->paramsView
         );
         $this->view->render();
     }
@@ -45,19 +49,15 @@ class ProfilController extends Controller {
      */
     public function listeAmisAction(): void {
         $_SESSION[self::NOM_SESSION_TOKEN_PROFIL] = uniqid();
-        $paramsView = [
+        $this->paramsView = [
             'token' => $_SESSION[self::NOM_SESSION_TOKEN_PROFIL],
             'listeAmis' => $this->profil->getProfilsAmis()
         ];
-        if (isset($_SESSION[self::NOM_SESSION_ERREUR_PROFIL])) {
-            $paramsView['erreur'] = $this->getMessageErreur($_SESSION[self::NOM_SESSION_ERREUR_PROFIL]);
-            unset($_SESSION[self::NOM_SESSION_ERREUR_PROFIL]);
-        }
         $this->view->setTemplate(
             ViewBlocks::CONTENU,
             'profil/listeAmis.twig',
             'listeAmis',
-            $paramsView
+            $this->paramsView
         );
         $this->view->render();
     }
@@ -66,7 +66,7 @@ class ProfilController extends Controller {
      * Page de soumission des formulaires
      * @return void
      */
-    public function postAction() {
+    public function postAction(): void {
         if (!isset($_POST['token']) || !isset($_SESSION[self::NOM_SESSION_TOKEN_PROFIL]) || $_POST['token'] !== $_SESSION[self::NOM_SESSION_TOKEN_PROFIL]) {
             $_SESSION[self::NOM_SESSION_ERREUR_PROFIL] = Erreurs::FORMULAIRE_NON_VALIDE;
             $this->redirect('/profil');
@@ -79,12 +79,39 @@ class ProfilController extends Controller {
             $this->profil->retireAmi($_POST['supprimerAmi']);
             $this->redirect('/profil/listeAmis');
         }
+        if (isset($_POST['supprimerProfil'])) {
+            if (!isset($_POST['mdp']) || !password_verify($_POST['mdp'], $this->profil->getMdp())) {
+                $_SESSION[self::NOM_SESSION_ERREUR_PROFIL] = Erreurs::MAUVAIS_MDP;
+                $this->redirect('/profil/supprimer');
+            }
+            $this->profil->supprime();
+            session_destroy();
+            $this->redirect('/');
+        }
+        $this->redirect('/profil');
+    }
+
+    /**
+     * Page de suppression de profil
+     * @return void
+     */
+    public function supprimerAction(): void {
+        $_SESSION[self::NOM_SESSION_TOKEN_PROFIL] = uniqid();
+        $this->paramsView['token'] = $_SESSION[self::NOM_SESSION_TOKEN_PROFIL];
+        $this->view->setTemplate(
+            ViewBlocks::CONTENU,
+            'profil/supprimer.twig',
+            'supprimerProfil',
+            $this->paramsView
+        );
+        $this->view->render();
     }
 
     protected function getMessageErreur(Erreurs $erreur): string {
         return match ($erreur) {
             Erreurs::FORMULAIRE_NON_VALIDE => "Votre formulaire était non valide, veuillez réessayer.",
-            Erreurs::IDENTIFIANT_AMI_INCONNU => "L'identifiant fourni pour la suppression de l'ami est inconnu",
+            Erreurs::IDENTIFIANT_AMI_INCONNU => "L'identifiant fourni pour la suppression de l'ami est inconnu.",
+            Erreurs::MAUVAIS_MDP => "Le mot de passe renseigné n'est pas le bon.",
             default => ""
         };
     }
