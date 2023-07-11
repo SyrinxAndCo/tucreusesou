@@ -91,6 +91,9 @@ class ProfilController extends Controller {
             session_destroy();
             $this->redirect('/');
         }
+        if (isset($_POST['supprimerContrat'])) {
+            $this->profil->getContrat()?->supprime();
+        }
         if (isset($_POST['editerProfil'])) {
             if (isset($_POST['mdp']) && $_POST['mdp'] !== "") {
                 if (!isset($_POST['mdp2'])) {

@@ -40,7 +40,7 @@
                 <div class="champ">
                     <label>
                         Date de début :
-                        <input type="date" name="dateDebut" value="{{ profil.contrat.dateDebut|date('Y-m-d') }}" id="dateDebut"/>
+                        <input type="date" name="dateDebut" {% if profil.contrat.dateDebut %}value="{{ profil.contrat.dateDebut|date('Y-m-d') }}"{% endif %} id="dateDebut"/>
                     </label>
                 </div>
                 <div class="champ">
@@ -52,13 +52,13 @@
                 <div class="champ">
                     <label>
                         CDI :
-                        <input type="checkbox" name="cdi" {% if profil.contrat.dateDebut and not profil.contrat.dateFin %}checked{% endif%} id="cdi"/>
+                        <input type="checkbox" name="cdi" {% if profil.contrat.dateDebut and not profil.contrat.dateFin %}checked{% endif %} id="cdi"/>
                     </label>
                 </div>
                 <div class="champ">
                     <label>
                         En activité :
-                        <input type="checkbox" name="enActivite" {% if profil.contrat.enActivite %}checked{% endif%} id="enActivite"/>
+                        <input type="checkbox" name="enActivite" {% if profil.contrat.enActivite %}checked{% endif %} id="enActivite"/>
                     </label>
                 </div>
                 <div class="champ">
@@ -66,12 +66,20 @@
                         Département :
                         <select name="idDepartement" id="idDepartement">
                             {% for departement in listeDepartements %}
-                                <option value="{{ departement.id }}" {% if profil.contrat.departement.id == departement.id %}selected{% endif %}>{{ departement.numero }} - {{ departement.nom }}</option>
+                                <option value="{{ departement.id }}" {% if profil.contrat.departement.id == departement.id %}selected{% endif %}>
+                                    {{ departement.numero }} - {{ departement.nom }}
+                                </option>
                             {% endfor %}
                         </select>
                     </label>
                 </div>
             </div>
+            {% if profil.contrat %}
+                <div class="message">
+                    Vous pouvez aussi supprimer le contrat renseigné.
+                </div>
+                <button name="supprimerContrat" id="supprimerContrat">Supprimer le contrat</button>
+            {% endif %}
             <div class="message">
                 Si vous souhaitez changer de mot de passe, remplissez-bien les deux champs.
             </div>

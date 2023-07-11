@@ -39,7 +39,7 @@ class InscriptionController extends Controller {
         }
         $this->view->setTemplate(
             ViewBlocks::CONTENU,
-            'inscription/index.twig',
+            'inscription/inscription.twig',
             'inscriptionFormulaire',
             $paramsView
         );
