@@ -76,7 +76,7 @@ class Contrat extends Model {
      */
     public function sauvegarde(): bool {
         if ($this->id) {
-            $query = self::getDB()->prepare('UPDATE ' . self::TABLE . ' SET (idProfil = :idProfil, dateDebut = :dateDebut, dateFin = :dateFin, idDepartement = :idDepartement, enActivite = :enActivite) WHERE id = :id');
+            $query = self::getDB()->prepare('UPDATE ' . self::TABLE . ' SET idProfil = :idProfil, dateDebut = :dateDebut, dateFin = :dateFin, idDepartement = :idDepartement, enActivite = :enActivite WHERE id = :id');
             return $query->execute(
                 [
                     'id' => $this->id,
@@ -84,7 +84,7 @@ class Contrat extends Model {
                     'dateDebut' => $this->dateDebut,
                     'dateFin' => $this->dateFin,
                     'idDepartement' => $this->departement->getId(),
-                    'enActivite' => $this->enActivite
+                    'enActivite' => $this->enActivite ? 1 : 0
                 ]
             );
         } else {
@@ -96,7 +96,7 @@ class Contrat extends Model {
                         'dateDebut' => $this->dateDebut,
                         'dateFin' => $this->dateFin,
                         'idDepartement' => $this->departement->getId(),
-                        'enActivite' => $this->enActivite
+                        'enActivite' => $this->enActivite ? 1 : 0
                     ]
                 );
             }

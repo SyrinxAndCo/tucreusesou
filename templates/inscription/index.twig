@@ -2,7 +2,6 @@
     <h1>
         Inscription à Tu Creuses où ?
     </h1>
-    {{ erreur }}
     {{ include('blocs/erreur.twig', {erreur: erreur}, with_context = false) }}
     <form action="/inscription/post" id="TuCreusesOu" method="post">
         <input type="hidden" name="token" id="token" value="{{ token }}" />

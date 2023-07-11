@@ -54,6 +54,25 @@ class Departement extends Model {
     }
 
     /**
+     * Vérifie si un identifiant de département existe bien en base
+     * @param int $id
+     * @return bool
+     */
+    public static function existeId(int $id): bool {
+        $query = self::getDB()->prepare('SELECT EXISTS(SELECT 1 FROM ' . self::TABLE . ' WHERE id = :id)');
+        if ($query) {
+            if ($query->execute(['id' => $id])) {
+                $res = $query->fetch();
+                if ($res) {
+                    return $res[0];
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * @return int
      */
     public function getId(): int {

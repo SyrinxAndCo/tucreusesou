@@ -6,6 +6,7 @@ use TuCreusesOu\Enum\Erreurs;
 use TuCreusesOu\Enum\ViewBlocks;
 use TuCreusesOu\Exceptions\InscriptionCodeInconnuException;
 use TuCreusesOu\Exceptions\InscriptionDelaiException;
+use TuCreusesOu\Helper\Constantes;
 use TuCreusesOu\Helper\Mailer;
 use TuCreusesOu\Model\Inscription;
 use TuCreusesOu\Model\Profil;
@@ -63,15 +64,15 @@ class InscriptionController extends Controller {
             $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = Erreurs::MOT_DE_PASSE_DIFFERENT;
             $this->redirect('/inscription');
         }
-        if (!preg_match(Controller::REGEX_EMAIL, $_POST['email'])) {
+        if (!preg_match(Constantes::REGEX_EMAIL, $_POST['email'])) {
             $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = Erreurs::EMAIL_INVALIDE;
             $this->redirect('/inscription');
         }
-        if (!preg_match('/^[a-zA-ZÀ-ÿ\-. ]*$/', $_POST['nom']) || !preg_match('/^[a-zA-ZÀ-ÿ\-. ]*$/', $_POST['prenom'])) {
-            $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = Erreurs::CARACTERES_INTERDITS;
+        if (!preg_match(Constantes::REGEX_NOM, $_POST['nom']) || !preg_match(Constantes::REGEX_NOM, $_POST['prenom'])) {
+            $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = Erreurs::CARACTERES_INTERDITS_NOM;
             $this->redirect('/inscription');
         }
-        if (!preg_match('/^[a-zA-ZÀ-ÿ\-. ,!*\/+#?%$£^¨°_|&]*$/', $_POST['mdp'])) {
+        if (!preg_match(Constantes::REGEX_TEXT, $_POST['mdp'])) {
             $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = Erreurs::MDP_INTERDIT;
             $this->redirect('/inscription');
         }
@@ -147,7 +148,7 @@ class InscriptionController extends Controller {
             Erreurs::CHAMP_MANQUANT => "Il manque un champ requis dans votre formulaire.",
             Erreurs::MOT_DE_PASSE_DIFFERENT => "Le mot de passe entré en vérification est différent du mot de passe donné.",
             Erreurs::EMAIL_INVALIDE => "L'email fourni est invalide.",
-            Erreurs::CARACTERES_INTERDITS => "Votre nom ou votre prénom contiennent des caractères interdits. Si ces caractères sont légitimes, veuillez contacter l'administratrice du site en donnant vos noms et prénoms afin d'ouvrir la possibilité d'utiliser les caractères manquants. Les mesures de sécurité sont parfois un peu ennuyantes, veuillez nous excuser.",
+            Erreurs::CARACTERES_INTERDITS_NOM => "Votre nom ou votre prénom contiennent des caractères interdits. Si ces caractères sont légitimes, veuillez contacter l'administratrice du site en donnant vos noms et prénoms afin d'ouvrir la possibilité d'utiliser les caractères manquants. Les mesures de sécurité sont parfois un peu ennuyantes, veuillez nous excuser.",
             Erreurs::MDP_INTERDIT => "Votre mot de passe contient des caractères interdits.",
             Erreurs::CODE_EMAIL_MANQUANT => "Il manque le code de validation de votre email.",
             Erreurs::CODE_EMAIL_DELAI_DEPASSE => "Le délai de validation de votre inscription a été dépassée, veuillez renouveler votre inscription.",

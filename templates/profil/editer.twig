@@ -1,0 +1,93 @@
+{% block editerProfil %}
+    <div class="editerProfil">
+        {{ include('blocs/erreur.twig', {erreur: erreur}, with_context = false) }}
+        <form action="/profil/post" method="post" id="editerProfil">
+            <div class="message">
+                Tout champ non rempli ne sera pas modifié.
+            </div>
+            <input name="token" id="token" value="{{ token }}" type="hidden">
+            <div class="champ">
+                <label>
+                    Nom :
+                    <input type="text" name="nom" id="nom" placeholder="{{ profil.nom }}"/>
+                </label>
+            </div>
+            <div class="champ">
+                <label>
+                    Prénom :
+                    <input type="text" name="prenom" id="prenom" placeholder="{{ profil.prenom }}"/>
+                </label>
+            </div>
+            <div class="champ">
+                <label>
+                    Description :
+                    <input type="text" name="description" id="description" placeholder="{{ profil.description }}" maxlength="300"/>
+                </label>
+            </div>
+            <div class="message">
+                Le changement d'email n'est pas encore implémenté.
+            </div>
+            <div class="champ">
+                <label>
+                    Email :
+                    <input type="email" name="email" id="email" placeholder="{{ profil.mail }}" disabled/>
+                </label>
+            </div>
+            <div class="editionContrat">
+                <div class="message">
+                    Vous pouvez renseigner ci-dessous votre contrat en cours ou à venir.
+                </div>
+                <div class="champ">
+                    <label>
+                        Date de début :
+                        <input type="date" name="dateDebut" value="{{ profil.contrat.dateDebut|date('Y-m-d') }}" id="dateDebut"/>
+                    </label>
+                </div>
+                <div class="champ">
+                    <label>
+                        Date de fin :
+                        <input type="date" name="dateFin" {% if profil.contrat.dateFin %}value="{{ profil.contrat.dateFin|date('Y-m-d') }}"{% endif %} id="dateFin"/>
+                    </label>
+                </div>
+                <div class="champ">
+                    <label>
+                        CDI :
+                        <input type="checkbox" name="cdi" {% if profil.contrat.dateDebut and not profil.contrat.dateFin %}checked{% endif%} id="cdi"/>
+                    </label>
+                </div>
+                <div class="champ">
+                    <label>
+                        En activité :
+                        <input type="checkbox" name="enActivite" {% if profil.contrat.enActivite %}checked{% endif%} id="enActivite"/>
+                    </label>
+                </div>
+                <div class="champ">
+                    <label>
+                        Département :
+                        <select name="idDepartement" id="idDepartement">
+                            {% for departement in listeDepartements %}
+                                <option value="{{ departement.id }}" {% if profil.contrat.departement.id == departement.id %}selected{% endif %}>{{ departement.numero }} - {{ departement.nom }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+                </div>
+            </div>
+            <div class="message">
+                Si vous souhaitez changer de mot de passe, remplissez-bien les deux champs.
+            </div>
+            <div class="champ">
+                <label>
+                    Mot de passe :
+                    <input type="password" name="mdp" id="mdp" minlength="8"/>
+                </label>
+            </div>
+            <div class="champ">
+                <label>
+                    Confirmez le mot de passe :
+                    <input type="password" name="mdp2" id="mdp2" minlength="8"/>
+                </label>
+            </div>
+            <button name="editerProfil">Valider les changements</button>
+        </form>
+    </div>
+{% endblock %}

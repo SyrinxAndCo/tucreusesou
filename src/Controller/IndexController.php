@@ -4,6 +4,7 @@ namespace TuCreusesOu\Controller;
 
 use TuCreusesOu\Enum\Erreurs;
 use TuCreusesOu\Enum\ViewBlocks;
+use TuCreusesOu\Helper\Constantes;
 use TuCreusesOu\Model\Profil;
 use TuCreusesOu\View\IndexView;
 
@@ -49,7 +50,7 @@ class IndexController extends Controller {
             $_SESSION[self::NOM_SESSION_ERREUR_CONNEXION] = Erreurs::CHAMP_MANQUANT;
             $this->redirect('/');
         }
-        if (!preg_match(Controller::REGEX_EMAIL, $_POST['email'])) {
+        if (!preg_match(Constantes::REGEX_EMAIL, $_POST['email'])) {
             $_SESSION[self::NOM_SESSION_ERREUR_CONNEXION] = Erreurs::EMAIL_INVALIDE;
             $this->redirect('/');
         }
