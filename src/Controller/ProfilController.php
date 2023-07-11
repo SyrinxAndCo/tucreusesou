@@ -54,7 +54,8 @@ class ProfilController extends Controller {
         $_SESSION[self::NOM_SESSION_TOKEN_PROFIL] = uniqid();
         $this->paramsView = [
             'token' => $_SESSION[self::NOM_SESSION_TOKEN_PROFIL],
-            'listeAmis' => $this->profil->getProfilsAmis()
+            'listeAmis' => $this->profil->getProfilsAmis(),
+            'listeProfilsNonAmis' => $this->profil->getProfilsNonAmis()
         ];
         $this->view->setTemplate(
             ViewBlocks::CONTENU,
@@ -80,6 +81,14 @@ class ProfilController extends Controller {
                 $this->redirect('/profil/listeAmis');
             }
             $this->profil->retireAmi($_POST['supprimerAmi']);
+            $this->redirect('/profil/listeAmis');
+        }
+        if (isset($_POST['ajouterAmi'])) {
+            if (!preg_match('/\d+/', $_POST['ajouterAmi'])) {
+                $_SESSION[self::NOM_SESSION_ERREUR_PROFIL] = Erreurs::IDENTIFIANT_AMI_INCONNU;
+                $this->redirect('/profil/listeAmis');
+            }
+            $this->profil->ajouteAmi($_POST['ajouterAmi']);
             $this->redirect('/profil/listeAmis');
         }
         if (isset($_POST['supprimerProfil'])) {

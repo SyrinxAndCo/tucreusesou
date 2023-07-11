@@ -19,7 +19,7 @@ abstract class View {
     private array $scripts = [];
     private array $styles = [];
     private array $blocks = [];
-    private string $titre = 'Tu creuses où ? (Vive les archéologues)';
+    private string $titre = 'Tu creuses où ?';
     private array $bodyParams = [];
     private string $onLoad = '';
 

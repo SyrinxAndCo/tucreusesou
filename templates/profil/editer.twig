@@ -1,4 +1,5 @@
 {% block editerProfil %}
+    <button class="retour"><a class="boutonLien" href="/profil">Retour au profil</a></button>
     <div class="editerProfil">
         {{ include('blocs/erreur.twig', {erreur: erreur}, with_context = false) }}
         <form action="/profil/post" method="post" id="editerProfil">

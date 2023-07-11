@@ -3,9 +3,24 @@
     <div class="listeAmis">
         {{ include('blocs/erreur.twig', {erreur: erreur}, with_context = false) }}
         <form id="listeAmis" method="post" action="/profil/post">
+            <input name="token" id="token" value="{{ token }}" type="hidden">
             {% for ami in listeAmis %}
                 {{ include('profil/carteAmi.twig', {ami: ami}, with_context = false) }}
                 <button name="supprimerAmi" value="{{ ami.id }}" class="supprimerAmi">Supprimer de la liste</button>
+            {% else %}
+                Vous n'avez pas encore d'amis dans votre liste.
+            {% endfor %}
+        </form>
+        <div class="message">
+            Vous pouvez aussi ajouter des amis à votre liste.
+        </div>
+        <form id="listeNonAmis" method="post" action="/profil/post">
+            <input name="token" id="token" value="{{ token }}" type="hidden">
+            {% for profil in listeProfilsNonAmis %}
+                {{ include('profil/carteAmi.twig', {ami: profil}, with_context = false) }}
+                <button name="ajouterAmi" value="{{ profil.id }}" class="ajouterAmi">Ajouter à la liste</button>
+            {% else %}
+                Il n'y a plus de profil en dehors de votre liste d'amis.
             {% endfor %}
         </form>
     </div>

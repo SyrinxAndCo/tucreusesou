@@ -44,7 +44,7 @@
             Liste de vos amis dans le même département :
         </div>
         <div class="amis">
-            {% for ami in profil.profilsAmis|filter(v => profil.estAmitie(v.id) and profil.contrat.departement.id == v.contrat.departement.id) %}
+            {% for ami in profil.profilsAmis|filter(v => profil.estAmitie(v.id) and profil.contrat.departement.id == v.contrat.departement.id and v.contrat.dateFin > 'now'|date('U')) %}
                 {{ include('profil/carteAmi.twig', {ami: ami}, with_context = false) }}
                 {% else %}
                 Il n'y a actuellement personne dans votre liste d'amis qui soit dans le même département que vous.

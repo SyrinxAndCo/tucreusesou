@@ -249,6 +249,23 @@ class Profil extends Model {
     }
 
     /**
+     * Renvoie la liste de tous les profils enregistrés
+     * @return array
+     */
+    public function getProfilsNonAmis(): array {
+        $query = self::getDB()->query('SELECT id FROM ' . self::TABLE . ' WHERE id NOT IN (' . $this->id . (count($this->amis) > 0 ? ',' . implode(',', $this->amis) : '') . ')');
+        if ($query) {
+            $res = $query->fetchAll();
+            $listeProfils = [];
+            foreach ($res as $profil) {
+                $listeProfils[$profil['id']] = Profil::getProfilParId($profil['id']);
+            }
+            return $listeProfils;
+        }
+        return [];
+    }
+
+    /**
      * @return ?int
      */
     public function getId(): ?int {
