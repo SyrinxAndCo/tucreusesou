@@ -42,7 +42,7 @@ class Mailer {
         $sendSmtpEmail['templateId'] = self::ID_TEMPLATE_INSCRIPTION;
         $sendSmtpEmail['params'] = [
             'nom' => $nom,
-            'host' => 'https://tucreusesou.localhost',
+            'host' => HOST,
             'code' => $code
         ];
 
