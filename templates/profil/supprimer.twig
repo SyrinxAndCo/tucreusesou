@@ -1,6 +1,9 @@
 {% block supprimerProfil %}
     <div class="supprimerProfil">
         {{ include('blocs/erreur.twig', {erreur: erreur}, with_context = false) }}
+        <div class="titre">
+            Suppression de compte
+        </div>
         <div class="messageImportant">
             <p>Vous êtes sur le point de supprimer votre profil sur Tu Creuses où ?</p>
             <p>Cette action est irréversible et supprimera toutes les données liées à votre compte.</p>
@@ -15,8 +18,10 @@
                     <input type="password" id="mdp" name="mdp">
                 </label>
             </div>
-            <button name="supprimerProfil">Supprimer mon compte</button>
-            <button name="annuler" type="button"><a href="/profil">Annuler</a></button>
+            <div class="boutons">
+                <button name="supprimerProfil" class="supprimerProfil">Supprimer</button>
+                <button name="annuler" type="button" class="boutonLien"><a href="/profil">Annuler</a></button>
+            </div>
         </form>
     </div>
 {% endblock %}

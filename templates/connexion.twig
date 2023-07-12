@@ -4,21 +4,22 @@
         <form id="connexion" action="/index/post" method="post">
             <input type="hidden" name="token" id="token" value="{{ token }}">
             <div class="champ">
-                <label>
+                <label for="email">
                     Email :
-                    <input type="email" name="email" id="email" required>
                 </label>
+                <input type="email" name="email" id="email" required>
             </div>
             <div class="champ">
-                <label>
+                <label for="mdp">
                     Mot de passe :
-                    <input type="password" name="mdp" id="mdp" required>
                 </label>
+                <input type="password" name="mdp" id="mdp" required>
             </div>
             <button class="boutonValider">Se connecter</button>
         </form>
         <div class="message">
-            Pas encore de compte ? <a href="/inscription">Inscrivez-vous</a> !
+            Pas encore de compte ?<br>
+            <a href="/inscription">Inscrivez-vous</a> !
         </div>
     </div>
 {% endblock %}

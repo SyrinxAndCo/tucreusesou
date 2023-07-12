@@ -3,6 +3,7 @@
 namespace TuCreusesOu\View;
 
 use TuCreusesOu\Enum\ViewBlocks;
+use TuCreusesOu\Helper\Constantes;
 use TuCreusesOu\TwigExtension\TwigFunctions;
 use TuCreusesOu\TwigExtension\TwigFilters;
 use Twig\Environment;
@@ -33,6 +34,7 @@ abstract class View {
         $this->twig->addExtension(new IntlExtension());
         $this->setTemplate(ViewBlocks::BANNIERE, 'banniere.twig', 'banniere');
         $this->setTemplate(ViewBlocks::PIED_DE_PAGE, 'piedDePage.twig', 'piedDePage');
+        $this->ajouteStyle('global.css');
     }
 
     public function render(): void {
@@ -44,7 +46,8 @@ abstract class View {
             'scripts' => $this->scripts,
             'styles' => $this->styles,
             'blocks' => $this->blocks,
-            'titre' => $this->titre
+            'titre' => $this->titre,
+            'version' => Constantes::VERSION
         ];
         foreach ($this->blocks as $block) {
             if ($block !== []) {

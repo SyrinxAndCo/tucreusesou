@@ -154,7 +154,7 @@ class ProfilController extends Controller {
                     $this->redirect('/profil/editer');
                 }
                 $dateDebut = strtotime($_POST['dateDebut']);
-                if (!isset($_POST['cdi'])) {
+                if (!isset($_POST['cdi']) && isset($_POST['enActivite'])) {
                     if (!isset($_POST['dateFin'])) {
                         $_SESSION[self::NOM_SESSION_ERREUR_PROFIL] = Erreurs::CDD_SANS_FIN;
                         $this->redirect('/profil/editer');
@@ -178,7 +178,7 @@ class ProfilController extends Controller {
                     $_SESSION[self::NOM_SESSION_ERREUR_PROFIL] = Erreurs::DEPARTEMENT_INCONNU;
                     $this->redirect('/profil/editer');
                 }
-                $contrat = $this->profil->getContrat() ?? new Contrat($this->profil->getId(), strtotime($_POST['dateDebut']), strtotime($_POST['dateFin']), Departement::getDepartementParId($_POST['idDepartement']), $_POST['enActivite']);
+                $contrat = $this->profil->getContrat() ?? new Contrat($this->profil->getId(), 0, null, Departement::getDepartementParId(1), true);
                 $contrat->setDateDebut($dateDebut);
                 $contrat->setDateFin($dateFin);
                 $contrat->setDepartement(Departement::getDepartementParId($_POST['idDepartement']));

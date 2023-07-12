@@ -5,28 +5,34 @@
             {{ profil.prenom }} {{ profil.nom }}
         </div>
         <div class="description">
-            <span class="titreDescription">Description :</span> {{ profil.description ?? 'Aucune description fournie' }}
+            <span class="legende">Description :</span> {{ profil.description ?? 'Aucune description fournie' }}
         </div>
         <div class="contrat">
             {% if profil.contrat %}
                 {% if profil.contrat.enactivite %}
+                    <div class="titre">Contrat</div>
                     <div class="dateContrat">
-                        Date de début du contrat : {{ profil.contrat.dateDebut|date('D d F Y')|format_date('full', locale='fr') }}
+                        <span class="legende">Date de début :</span>
+                        {{ profil.contrat.dateDebut|date('D d F Y')|format_date('full', locale='fr') }}
                     </div>
                     <div class="dateContrat">
-                        Date de fin du contrat
-                        : {% if profil.contrat.dateFin %}{{ profil.contrat.dateFin|date('D d F Y')|format_date('full', locale='fr') }}{% else %}Pas de fin, il s'agit d'un CDI{% endif %}
+                        <span class="legende">Date de fin :</span>
+                        {% if profil.contrat.dateFin %}{{ profil.contrat.dateFin|date('D d F Y')|format_date('full', locale='fr') }}{% else %}Pas de fin, il s'agit d'un CDI{% endif %}
                     </div>
                     <div class="departement">
-                        Département du contrat : {{ profil.contrat.departement }}
+                        <span class="legende">Département :</span>
+                        {{ profil.contrat.departement }}
                     </div>
                 {% else %}
-                    <div class="departement">
-                        Département de résidence ou de séjour : {{ profil.contrat.departement }}
+                    <div class="departementResidence">
+                        <span class="legende">Département de résidence ou de séjour :</span>
+                        {{ profil.contrat.departement }}
                     </div>
                 {% endif %}
             {% else %}
-                Aucun contrat en cours
+                <div class="message">
+                    Aucun contrat en cours
+                </div>
             {% endif %}
         </div>
         <div class="liensProfil">
@@ -40,15 +46,23 @@
                 <a href="/profil/supprimer">Supprimer</a>
             </button>
         </div>
-        <div class="sousTitre">
-            Liste de vos amis dans le même département :
-        </div>
-        <div class="amis">
-            {% for ami in profil.profilsAmis|filter(v => profil.estAmitie(v.id) and profil.contrat.departement.id == v.contrat.departement.id and v.contrat.dateFin > 'now'|date('U')) %}
-                {{ include('profil/carteAmi.twig', {ami: ami}, with_context = false) }}
+        {% if profil.contrat and (not profil.contrat.dateFin or profil.contrat.dateFin > 'now'|date('U')) %}
+            <div class="sousTitre">
+                Liste de vos amis dans le même département :
+            </div>
+            <div class="amis">
+                {% for ami in profil.profilsAmis|filter(v => profil.estAmitie(v.id) and profil.contrat.departement.id == v.contrat.departement.id and (not v.contrat.dateFin or v.contrat.dateFin > 'now'|date('U'))) %}
+                    {{ include('profil/carteAmi.twig', {ami: ami}, with_context = false) }}
                 {% else %}
-                Il n'y a actuellement personne dans votre liste d'amis qui soit dans le même département que vous.
-            {% endfor %}
-        </div>
+                    <div class="message">
+                        Il n'y a actuellement personne dans votre liste d'amis qui soit dans le même département que vous.
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="sansContrat info">
+                Si vous souhaitez savoir qui est actuellement en contrat dans votre département, vous devez renseigner un contrat actif.
+            </div>
+        {% endif %}
     </div>
 {% endblock %}

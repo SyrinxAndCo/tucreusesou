@@ -1,26 +1,37 @@
 {% block listeAmis %}
-    <button class="retour"><a class="boutonLien" href="/profil">Retour au profil</a></button>
+    <button class="retour boutonLien"><a href="/profil">Retour au profil</a></button>
     <div class="listeAmis">
         {{ include('blocs/erreur.twig', {erreur: erreur}, with_context = false) }}
         <form id="listeAmis" method="post" action="/profil/post">
+            <div class="titre">
+                Liste d'amis
+            </div>
             <input name="token" id="token" value="{{ token }}" type="hidden">
             {% for ami in listeAmis %}
-                {{ include('profil/carteAmi.twig', {ami: ami}, with_context = false) }}
-                <button name="supprimerAmi" value="{{ ami.id }}" class="supprimerAmi">Supprimer de la liste</button>
+                <div class="ami {% if loop.index % 2 == 0 %}ligne1{% else %}ligne2{% endif %}">
+                    {{ include('profil/carteAmi.twig', {ami: ami}, with_context = false) }}
+                    <button name="supprimerAmi" value="{{ ami.id }}" class="supprimerAmi">X</button>
+                </div>
             {% else %}
-                Vous n'avez pas encore d'amis dans votre liste.
+                <div class="message">
+                    Vous n'avez pas encore d'amis dans votre liste.
+                </div>
             {% endfor %}
         </form>
-        <div class="message">
-            Vous pouvez aussi ajouter des amis à votre liste.
-        </div>
         <form id="listeNonAmis" method="post" action="/profil/post">
+            <div class="titre">
+                Autres profils
+            </div>
             <input name="token" id="token" value="{{ token }}" type="hidden">
             {% for profil in listeProfilsNonAmis %}
-                {{ include('profil/carteAmi.twig', {ami: profil}, with_context = false) }}
-                <button name="ajouterAmi" value="{{ profil.id }}" class="ajouterAmi">Ajouter à la liste</button>
+                <div class="ami {% if loop.index % 2 == 0 %}ligne2{% else %}ligne1{% endif %}">
+                    {{ include('profil/carteAmi.twig', {ami: profil}, with_context = false) }}
+                    <button name="ajouterAmi" value="{{ profil.id }}" class="ajouterAmi">+</button>
+                </div>
             {% else %}
-                Il n'y a plus de profil en dehors de votre liste d'amis.
+                <div class="message">
+                    Il n'y a plus de profil en dehors de votre liste d'amis.
+                </div>
             {% endfor %}
         </form>
     </div>
