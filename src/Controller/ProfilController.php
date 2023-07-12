@@ -148,7 +148,7 @@ class ProfilController extends Controller {
                 }
                 $this->profil->setDescription($_POST['description']);
             }
-            if (isset($_POST['dateDebut'])) {
+            if (isset($_POST['dateDebut']) && $_POST['dateDebut'] !== "") {
                 if (!preg_match(Constantes::REGEX_DATE, $_POST['dateDebut']) || !strtotime($_POST['dateDebut']) || strtotime($_POST['dateDebut']) < 0) {
                     $_SESSION[self::NOM_SESSION_ERREUR_PROFIL] = Erreurs::DATE_INVALIDE;
                     $this->redirect('/profil/editer');
