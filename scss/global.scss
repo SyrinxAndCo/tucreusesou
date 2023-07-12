@@ -157,6 +157,7 @@ body {
   color: red;
   font-size: 150%;
   text-align: center;
+  flex-basis: 100%;
 }
 
 .banniere {
@@ -300,27 +301,36 @@ button {
 }
 
 .editerProfil {
-  width:100%;
+  width: 100%;
 
   .message {
     padding: 0 5px;
     margin: 15px 0 5px 0;
   }
-  .nomPrenom, .formulaireContrat {
-    display:flex;
+
+  .formulaireContrat {
     flex-wrap: wrap;
+  }
+
+  .nomPrenom, .formulaireContrat {
+    display: flex;
+
     .champ {
       flex-basis: 50%;
+      max-width: 50%;
+
       &.departement {
         flex-basis: 100%;
-        text-align:center;
+        text-align: center;
       }
     }
   }
+
   .supprimerContrat {
     width: 100%;
     text-align: center;
     font-weight: bold;
+
     button {
       color: darkred;
       padding: 5px 10px;
