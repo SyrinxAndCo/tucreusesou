@@ -209,6 +209,11 @@ button {
   width: 100%;
   text-align: center;
 
+  #rechercheProfil {
+    margin-bottom: 10px;
+    display: block;
+  }
+
   form {
     flex-basis: 50%;
     margin: 1px;

@@ -1,0 +1,10 @@
+{% for profil in listeProfilsNonAmis %}
+    <div class="ami {% if loop.index % 2 == 0 %}ligne2{% else %}ligne1{% endif %}">
+        {{ include('profil/carteAmi.twig', {ami: profil}, with_context = false) }}
+        <button name="ajouterAmi" value="{{ profil.id }}" class="ajouterAmi">+</button>
+    </div>
+{% else %}
+    <div class="message">
+        Il n'y a plus de profil en dehors de votre liste d'amis.
+    </div>
+{% endfor %}

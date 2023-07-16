@@ -249,18 +249,26 @@ class Profil extends Model {
     }
 
     /**
-     * Renvoie la liste de tous les profils enregistrés
+     * Renvoie la liste de tous les profils enregistrés correspondants à la recherche
+     * @param string|null $recherche
      * @return array
      */
-    public function getProfilsNonAmis(): array {
-        $query = self::getDB()->query('SELECT id FROM ' . self::TABLE . ' WHERE id NOT IN (' . $this->id . (count($this->amis) > 0 ? ',' . implode(',', $this->amis) : '') . ')');
+    public function getProfilsNonAmis(?string $recherche = null): array {
+        $query = self::getDB()->prepare(
+            'SELECT id FROM ' . self::TABLE .
+            ' WHERE id NOT IN (' . $this->id . (count($this->amis) > 0 ? ',' . implode(',', $this->amis) : '') . ') ' .
+            ($recherche ? ' AND (nom LIKE :recherche1 OR prenom LIKE :recherche2 ) ' : '') .
+            'ORDER BY nom ASC'
+        );
         if ($query) {
-            $res = $query->fetchAll();
-            $listeProfils = [];
-            foreach ($res as $profil) {
-                $listeProfils[$profil['id']] = Profil::getProfilParId($profil['id']);
+            if ($query->execute($recherche ? ['recherche1' => '%' . $recherche . '%', 'recherche2' => '%' . $recherche . '%'] : [])) {
+                $res = $query->fetchAll();
+                $listeProfils = [];
+                foreach ($res as $profil) {
+                    $listeProfils[$profil['id']] = Profil::getProfilParId($profil['id']);
+                }
+                return $listeProfils;
             }
-            return $listeProfils;
         }
         return [];
     }

@@ -57,6 +57,7 @@ class ProfilController extends Controller {
             'listeAmis' => $this->profil->getProfilsAmis(),
             'listeProfilsNonAmis' => $this->profil->getProfilsNonAmis()
         ];
+        $this->view->ajouteScript('listeAmis.js');
         $this->view->setTemplate(
             ViewBlocks::CONTENU,
             'profil/listeAmis.twig',
@@ -222,6 +223,21 @@ class ProfilController extends Controller {
             $this->paramsView
         );
         $this->view->render();
+    }
+
+    /**
+     * Système de recherche
+     * @param string $recherche
+     * @return void
+     */
+    public function rechercheAction(string $recherche = ""): void {
+        $this->paramsView = [
+            'listeProfilsNonAmis' => $this->profil->getProfilsNonAmis($recherche)
+        ];
+        $this->view->renderPart(
+            'profil/listeNonAmis.twig',
+            $this->paramsView
+        );
     }
 
     protected function getMessageErreur(Erreurs $erreur): string {

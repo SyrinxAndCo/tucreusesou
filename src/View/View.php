@@ -74,6 +74,26 @@ abstract class View {
     }
 
     /**
+     * Fonction "render" pour un morceau de page
+     * @param string $template
+     * @param array $params
+     * @return void
+     */
+    public function renderPart(string $template, array $params = []): void {
+        try {
+            echo $this->twig->render(
+                $template,
+                $params
+            );
+        } catch (Error $e) {
+            echo 'Grosse erreur twig....<br>';
+            echo $e->getMessage() . '<br>';
+            echo 'Line ' .  $e->getLine() . ' in ' . $e->getFile();
+            die;
+        }
+    }
+
+    /**
      * Ajoute un fichier CSS à la page
      * @param string $path
      * @return void
