@@ -3,10 +3,10 @@
 namespace TuCreusesOu\Helper;
 
 use Exception;
-use SendinBlue\Client\Configuration;
-use SendinBlue\Client\Api\TransactionalEmailsApi;
+use Brevo\Client\Configuration;
+use Brevo\Client\Api\TransactionalEmailsApi;
 use GuzzleHttp\Client;
-use SendinBlue\Client\Model\SendSmtpEmail;
+use Brevo\Client\Model\SendSmtpEmail;
 
 class Mailer {
     static ?Mailer $instance = null;
