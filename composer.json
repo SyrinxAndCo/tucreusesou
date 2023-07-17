@@ -1,5 +1,9 @@
 {
     "name": "tucreusesou/tucreusesou",
+    "description": "Web application for Tu Creuses Où ? project, a tool for archaeologist in France",
+    "version": "1.0.1",
+    "homepage": "https://github.com/SyrinxAndCo/tucreusesou",
+    "license": "GPL-3.0-or-later",
     "type": "project",
     "autoload": {
         "psr-4": {

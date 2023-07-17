@@ -5,8 +5,7 @@ RUN apt-get -y update \
     && docker-php-ext-configure intl \
     && docker-php-ext-install intl pdo_mysql
 
-COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
-
-RUN install-php-extensions xdebug && \
-    rm /usr/local/bin/install-php-extensions && \
-    echo "xdebug.mode=develop,debug,coverage" > /usr/local/etc/php/conf.d/extra_conf.ini
+RUN pecl install xdebug &&\
+    docker-php-ext-enable xdebug &&\
+    echo "xdebug.mode=develop,debug,coverage" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini && \
+    echo "xdebug.client_host=host.docker.internal" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini

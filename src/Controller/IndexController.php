@@ -6,7 +6,6 @@ use TuCreusesOu\Enum\Erreurs;
 use TuCreusesOu\Enum\ViewBlocks;
 use TuCreusesOu\Helper\Constantes;
 use TuCreusesOu\Helper\ModelsHelper;
-use TuCreusesOu\Model\Profil;
 use TuCreusesOu\View\IndexView;
 
 class IndexController extends Controller {
