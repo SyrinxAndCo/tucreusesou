@@ -27,6 +27,7 @@ body {
   display: flex;
   width: 100%;
   align-items: center;
+  flex-wrap: wrap;
 
   #connexion {
     flex-basis: 50%;
