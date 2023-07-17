@@ -5,6 +5,7 @@ namespace TuCreusesOu\Controller;
 use TuCreusesOu\Enum\Erreurs;
 use TuCreusesOu\Enum\ViewBlocks;
 use TuCreusesOu\Helper\Constantes;
+use TuCreusesOu\Helper\ModelsHelper;
 use TuCreusesOu\Model\Contrat;
 use TuCreusesOu\Model\Departement;
 use TuCreusesOu\Model\Profil;
@@ -16,7 +17,7 @@ class ProfilController extends Controller {
     private const NOM_SESSION_TOKEN_PROFIL = 'tokenProfil';
     const NOM_SESSION_ERREUR_PROFIL = 'erreurProfil';
 
-    public function __construct(?ProfilView $view) {
+    public function __construct(?ProfilView $view, ?ModelsHelper $modelsHelper) {
         if (!isset($_SESSION['profil'])) {
             $this->redirect('/');
         }
@@ -28,7 +29,7 @@ class ProfilController extends Controller {
             $this->paramsView['erreur'] = $this->getMessageErreur($_SESSION[self::NOM_SESSION_ERREUR_PROFIL]);
             unset($_SESSION[self::NOM_SESSION_ERREUR_PROFIL]);
         }
-        parent::__construct($view ?? new ProfilView());
+        parent::__construct($view ?? new ProfilView(), $modelsHelper);
     }
 
     /**

@@ -25,7 +25,7 @@ abstract class View {
     private string $onLoad = '';
 
     protected function __construct() {
-        $loader = new FilesystemLoader('../templates');
+        $loader = new FilesystemLoader(__DIR__ . '/../../templates');
         $this->twig = new Environment($loader, []);
         $this->twig->addExtension(new TwigFilters());
         $this->twig->addExtension(new TwigFunctions());

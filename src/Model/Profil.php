@@ -230,7 +230,7 @@ class Profil extends Model {
     }
 
     /**
-     * Vérifie si une inscription est déjà en cours avec le mail passé en paramètre
+     * Vérifie si une profil est déjà inscrit avec le mail passé en paramètre
      * @param string $mail
      * @return bool
      */

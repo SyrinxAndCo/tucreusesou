@@ -5,18 +5,19 @@ namespace TuCreusesOu\Controller;
 use TuCreusesOu\Enum\Erreurs;
 use TuCreusesOu\Enum\ViewBlocks;
 use TuCreusesOu\Helper\Constantes;
+use TuCreusesOu\Helper\ModelsHelper;
 use TuCreusesOu\Model\Profil;
 use TuCreusesOu\View\IndexView;
 
 class IndexController extends Controller {
-    private const NOM_SESSION_TOKEN_CONNEXION = 'tokenConnexion';
-    private const NOM_SESSION_ERREUR_CONNEXION = 'erreurConnexion';
+    public const NOM_SESSION_TOKEN_CONNEXION = 'tokenConnexion';
+    public const NOM_SESSION_ERREUR_CONNEXION = 'erreurConnexion';
 
-    public function __construct(?IndexView $view) {
+    public function __construct(?IndexView $view, ?ModelsHelper $modelsHelper) {
         if (isset($_SESSION['profil'])) {
             $this->redirect('/profil');
         }
-        parent::__construct($view ?? new IndexView());
+        parent::__construct($view ?? new IndexView(), $modelsHelper);
     }
 
     /**
@@ -45,26 +46,25 @@ class IndexController extends Controller {
         if (!isset($_POST['token']) || !isset($_SESSION[self::NOM_SESSION_TOKEN_CONNEXION]) || $_POST['token'] !== $_SESSION[self::NOM_SESSION_TOKEN_CONNEXION]) {
             $_SESSION[self::NOM_SESSION_ERREUR_CONNEXION] = Erreurs::FORMULAIRE_NON_VALIDE;
             $this->redirect('/');
-        }
-        if (!isset($_POST['email']) || !isset($_POST['mdp'])) {
+        } elseif (!isset($_POST['email']) || !isset($_POST['mdp'])) {
             $_SESSION[self::NOM_SESSION_ERREUR_CONNEXION] = Erreurs::CHAMP_MANQUANT;
             $this->redirect('/');
-        }
-        if (!preg_match(Constantes::REGEX_EMAIL, $_POST['email'])) {
+        } elseif (!preg_match(Constantes::REGEX_EMAIL, $_POST['email'])) {
             $_SESSION[self::NOM_SESSION_ERREUR_CONNEXION] = Erreurs::EMAIL_INVALIDE;
             $this->redirect('/');
+        } else {
+            $profil = $this->modelsHelper->getProfilParMail($_POST['email']);
+            if ($profil === null) {
+                $_SESSION[self::NOM_SESSION_ERREUR_CONNEXION] = Erreurs::EMAIL_INCONNU;
+                $this->redirect('/');
+            } elseif (!password_verify($_POST['mdp'], $profil->getMdp())) {
+                $_SESSION[self::NOM_SESSION_ERREUR_CONNEXION] = Erreurs::MAUVAIS_MDP;
+                $this->redirect('/');
+            } else {
+                $_SESSION['profil'] = $profil;
+                $this->redirect('/profil');
+            }
         }
-        $profil = Profil::getProfilParMail($_POST['email']);
-        if ($profil === null) {
-            $_SESSION[self::NOM_SESSION_ERREUR_CONNEXION] = Erreurs::EMAIL_INCONNU;
-            $this->redirect('/');
-        }
-        if (!password_verify($_POST['mdp'], $profil->getMdp())) {
-            $_SESSION[self::NOM_SESSION_ERREUR_CONNEXION] = Erreurs::MAUVAIS_MDP;
-            $this->redirect('/');
-        }
-        $_SESSION['profil'] = $profil;
-        $this->redirect('/profil');
     }
 
     protected function getMessageErreur(Erreurs $erreur): string {

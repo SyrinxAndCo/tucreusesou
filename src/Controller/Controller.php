@@ -3,13 +3,16 @@
 namespace TuCreusesOu\Controller;
 
 use TuCreusesOu\Enum\Erreurs;
+use TuCreusesOu\Helper\ModelsHelper;
 use TuCreusesOu\View\View;
 
 abstract class Controller {
     protected View $view;
+    protected ModelsHelper $modelsHelper;
 
-    protected function __construct(View $view) {
+    protected function __construct(View $view, ?ModelsHelper $modelsHelper) {
         $this->view = $view;
+        $this->modelsHelper = $modelsHelper ?? new ModelsHelper();
     }
 
     abstract public function indexAction(): void;

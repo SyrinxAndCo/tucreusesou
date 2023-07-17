@@ -8,6 +8,7 @@ use TuCreusesOu\Exceptions\InscriptionCodeInconnuException;
 use TuCreusesOu\Exceptions\InscriptionDelaiException;
 use TuCreusesOu\Helper\Constantes;
 use TuCreusesOu\Helper\Mailer;
+use TuCreusesOu\Helper\ModelsHelper;
 use TuCreusesOu\Model\Inscription;
 use TuCreusesOu\Model\Profil;
 use TuCreusesOu\View\InscriptionView;
@@ -17,11 +18,11 @@ class InscriptionController extends Controller {
     private const NOM_SESSION_ERREUR_INSCRIPTION = 'erreurInscription';
     private const NOM_SESSION_POST_INSCRIPTION = 'postInscription';
 
-    public function __construct(?InscriptionView $view) {
+    public function __construct(?InscriptionView $view, ?ModelsHelper $modelsHelper) {
         if (isset($_SESSION['profil'])) {
             $this->redirect('/profil');
         }
-        parent::__construct($view ?? new InscriptionView());
+        parent::__construct($view ?? new InscriptionView(), $modelsHelper);
     }
 
     /**

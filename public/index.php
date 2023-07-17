@@ -3,6 +3,7 @@
 
 use TuCreusesOu\Controller\Controller;
 use TuCreusesOu\Controller\IndexController;
+use TuCreusesOu\Helper\ModelsHelper;
 use TuCreusesOu\View\IndexView;
 
 include_once '../vendor/autoload.php';
@@ -37,7 +38,7 @@ if (array_key_exists($request[1], $controllers) && array_key_exists($request[1],
     /**
      * @var Controller $controller
      */
-    $controller = new $controllers[$request[1]](new $views[$request[1]]());
+    $controller = new $controllers[$request[1]](new $views[$request[1]](), new ModelsHelper());
     if (count($request) > 2) {
         $methodName = $request[2] . 'Action';
         if (method_exists($controller, $methodName)) {
@@ -52,6 +53,6 @@ if (array_key_exists($request[1], $controllers) && array_key_exists($request[1],
         $controller->indexAction();
     }
 } else {
-    $controller = new IndexController(new IndexView());
+    $controller = new IndexController(new IndexView(), new ModelsHelper());
     $controller->indexAction();
 }
