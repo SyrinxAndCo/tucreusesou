@@ -14,14 +14,16 @@ use TuCreusesOu\Model\Profil;
 use TuCreusesOu\View\InscriptionView;
 
 class InscriptionController extends Controller {
-    private const NOM_SESSION_TOKEN_INSCRIPTION = 'tokenInscription';
-    private const NOM_SESSION_ERREUR_INSCRIPTION = 'erreurInscription';
-    private const NOM_SESSION_POST_INSCRIPTION = 'postInscription';
+    public const NOM_SESSION_TOKEN_INSCRIPTION = 'tokenInscription';
+    public const NOM_SESSION_ERREUR_INSCRIPTION = 'erreurInscription';
+    public const NOM_SESSION_POST_INSCRIPTION = 'postInscription';
+    private Mailer $mailer;
 
-    public function __construct(?InscriptionView $view, ?ModelsHelper $modelsHelper) {
+    public function __construct(?InscriptionView $view, ?ModelsHelper $modelsHelper, ?Mailer $mailer = null) {
         if (isset($_SESSION['profil'])) {
             $this->redirect('/profil');
         }
+        $this->mailer = $mailer ?? new Mailer();
         parent::__construct($view ?? new InscriptionView(), $modelsHelper);
     }
 
@@ -56,48 +58,40 @@ class InscriptionController extends Controller {
         if (!isset($_POST['token']) || !isset($_SESSION[self::NOM_SESSION_TOKEN_INSCRIPTION]) || $_POST['token'] !== $_SESSION[self::NOM_SESSION_TOKEN_INSCRIPTION]) {
             $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = Erreurs::FORMULAIRE_NON_VALIDE;
             $this->redirect('/inscription');
-        }
-        if (!isset($_POST['nom']) || !isset($_POST['prenom']) || !isset($_POST['email']) || !isset($_POST['mdp']) || !isset($_POST['mdp2'])) {
+        } elseif (!isset($_POST['nom']) || !isset($_POST['prenom']) || !isset($_POST['email']) || !isset($_POST['mdp']) || !isset($_POST['mdp2'])) {
             $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = Erreurs::CHAMP_MANQUANT;
             $this->redirect('/inscription');
-        }
-        if ($_POST['mdp'] !== $_POST['mdp2']) {
+        } elseif ($_POST['mdp'] !== $_POST['mdp2']) {
             $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = Erreurs::MOT_DE_PASSE_DIFFERENT;
             $this->redirect('/inscription');
-        }
-        if (!preg_match(Constantes::REGEX_EMAIL, $_POST['email'])) {
+        } elseif (!preg_match(Constantes::REGEX_EMAIL, $_POST['email'])) {
             $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = Erreurs::EMAIL_INVALIDE;
             $this->redirect('/inscription');
-        }
-        if (!preg_match(Constantes::REGEX_NOM, $_POST['nom']) || !preg_match(Constantes::REGEX_NOM, $_POST['prenom'])) {
+        } elseif (!preg_match(Constantes::REGEX_NOM, $_POST['nom']) || !preg_match(Constantes::REGEX_NOM, $_POST['prenom'])) {
             $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = Erreurs::CARACTERES_INTERDITS_NOM;
             $this->redirect('/inscription');
-        }
-        if (!preg_match(Constantes::REGEX_TEXT, $_POST['mdp'])) {
+        } elseif (!preg_match(Constantes::REGEX_TEXT, $_POST['mdp'])) {
             $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = Erreurs::MDP_INTERDIT;
             $this->redirect('/inscription');
-        }
-        if (strlen($_POST['mdp']) < 8) {
+        } elseif (strlen($_POST['mdp']) < 8) {
             $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = Erreurs::MDP_TROP_COURT;
             $this->redirect('/inscription');
-        }
-        if (Inscription::mailDejaPris($_POST['email']) || Profil::mailDejaPris($_POST['email'])) {
+        } elseif ($this->modelsHelper->mailDejaPris($_POST['email'])) {
             $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = Erreurs::MAIL_DEJA_PRIS;
             $this->redirect('/inscription');
-        }
-        unset($_SESSION[self::NOM_SESSION_POST_INSCRIPTION]);
-        unset($_SESSION[self::NOM_SESSION_TOKEN_INSCRIPTION]);
-        $inscription = new Inscription($_POST['nom'], $_POST['prenom'], password_hash($_POST['mdp'],  PASSWORD_DEFAULT), $_POST['email']);
-        $code = $inscription->sauvegarde();
-        if ($code) {
-            $mailer = new Mailer();
-            $mailer->envoieMailInscription($inscription->getPrenom() . ' ' . $inscription->getNom(), $inscription->getMail(), $code);
         } else {
-            $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = Erreurs::INSCRIPTION_GENERIQUE;
-            $this->redirect('/inscription');
+            unset($_SESSION[self::NOM_SESSION_POST_INSCRIPTION]);
+            unset($_SESSION[self::NOM_SESSION_TOKEN_INSCRIPTION]);
+            $inscription = $this->modelsHelper->initInscription($_POST['nom'], $_POST['prenom'], password_hash($_POST['mdp'], PASSWORD_DEFAULT), $_POST['email']);
+            $code = $inscription->sauvegarde();
+            if ($code) {
+                $this->mailer->envoieMailInscription($inscription->getPrenom() . ' ' . $inscription->getNom(), $inscription->getMail(), $code);
+                $this->redirect('/inscription/validation');
+            } else {
+                $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = Erreurs::INSCRIPTION_GENERIQUE;
+                $this->redirect('/inscription');
+            }
         }
-
-        $this->redirect('/inscription/validation');
     }
 
     /**
@@ -122,24 +116,26 @@ class InscriptionController extends Controller {
         if (!$code) {
             $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = Erreurs::CODE_EMAIL_MANQUANT;
             $this->redirect('/inscription');
-        }
-        try {
-            if (!Inscription::valideInscription($code)) {
-                $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = Erreurs::CODE_EMAIL_GENERIQUE;
+        } else {
+            try {
+                if (!$this->modelsHelper->valideInscription($code)) {
+                    $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = Erreurs::CODE_EMAIL_GENERIQUE;
+                    $this->redirect('/inscription');
+                } else {
+                    $this->view->setTemplate(
+                        ViewBlocks::CONTENU,
+                        'inscription/email.twig',
+                        'inscriptionEmailValidation'
+                    );
+                    $this->view->render();
+                }
+            } catch (InscriptionDelaiException) {
+                $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = Erreurs::CODE_EMAIL_DELAI_DEPASSE;
+                $this->redirect('/inscription');
+            } catch (InscriptionCodeInconnuException) {
+                $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = Erreurs::CODE_EMAIL_INCONNU;
                 $this->redirect('/inscription');
             }
-            $this->view->setTemplate(
-                ViewBlocks::CONTENU,
-                'inscription/email.twig',
-                'inscriptionEmailValidation'
-            );
-            $this->view->render();
-        } catch(InscriptionDelaiException $_) {
-            $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = Erreurs::CODE_EMAIL_DELAI_DEPASSE;
-            $this->redirect('/inscription');
-        } catch(InscriptionCodeInconnuException $_) {
-            $_SESSION[self::NOM_SESSION_ERREUR_INSCRIPTION] = Erreurs::CODE_EMAIL_INCONNU;
-            $this->redirect('/inscription');
         }
     }
 

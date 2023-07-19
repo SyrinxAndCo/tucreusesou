@@ -2,6 +2,8 @@
 
 namespace TuCreusesOu\Helper;
 
+use TuCreusesOu\Exceptions\InscriptionCodeInconnuException;
+use TuCreusesOu\Exceptions\InscriptionDelaiException;
 use TuCreusesOu\Model\Inscription;
 use TuCreusesOu\Model\Profil;
 
@@ -33,5 +35,27 @@ class ModelsHelper {
      */
     public function mailDejaPris(string $mail): bool {
         return Profil::mailDejaPris($mail) || Inscription::mailDejaPris($mail);
+    }
+
+    /**
+     * Crée une inscription à partir des informations fournies
+     * @param string $nom
+     * @param string $prenom
+     * @param string $mdp
+     * @param string $email
+     * @return Inscription
+     */
+    public function initInscription(string $nom, string $prenom, string $mdp, string $email): Inscription {
+        return new Inscription($nom, $prenom, $mdp, $email);
+    }
+
+    /**
+     * @param string $code
+     * @return bool
+     * @throws InscriptionCodeInconnuException
+     * @throws InscriptionDelaiException
+     */
+    public function valideInscription(string $code): bool {
+        return Inscription::valideInscription($code);
     }
 }
