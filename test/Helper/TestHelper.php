@@ -6,6 +6,10 @@ function uniqid(): string {
     return 'token';
 }
 
+function session_destroy(): void {
+    $_SESSION = null;
+}
+
 namespace TuCreusesOu\Test\Helper;
 
 use TuCreusesOu\Model\Contrat;
@@ -13,7 +17,7 @@ use TuCreusesOu\Model\Departement;
 use TuCreusesOu\Model\Profil;
 
 class TestHelper {
-    public function defaultProfil(): Profil {
+    public static function defaultProfil(): Profil {
         return new Profil(
             'nom',
             'prenom',

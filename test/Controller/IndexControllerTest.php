@@ -16,11 +16,9 @@ class IndexControllerTest extends TestCase {
     private IndexController $controller;
     private ModelsHelper $modelsHelper;
     private Profil $defaultProfil;
-    private TestHelper $testHelper;
 
     public function __construct(?string $name = null, array $data = [], $dataName = '') {
-        $this->testHelper = new TestHelper();
-        $this->defaultProfil = $this->testHelper->defaultProfil();
+        $this->defaultProfil = TestHelper::defaultProfil();
         parent::__construct($name, $data, $dataName);
     }
 

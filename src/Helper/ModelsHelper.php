@@ -4,6 +4,7 @@ namespace TuCreusesOu\Helper;
 
 use TuCreusesOu\Exceptions\InscriptionCodeInconnuException;
 use TuCreusesOu\Exceptions\InscriptionDelaiException;
+use TuCreusesOu\Model\Departement;
 use TuCreusesOu\Model\Inscription;
 use TuCreusesOu\Model\Profil;
 
@@ -57,5 +58,31 @@ class ModelsHelper {
      */
     public function valideInscription(string $code): bool {
         return Inscription::valideInscription($code);
+    }
+
+    /**
+     * Renvoie la liste de tous les départements enregistrés
+     * @return array
+     */
+    public function getTousDepartements(): array {
+        return Departement::getTousDepartements();
+    }
+
+    /**
+     * Renvoie le département correspondant à l'identifiant passé en paramètre
+     * @param int $id
+     * @return Departement|null
+     */
+    public function getDepartementParId(int $id): ?Departement {
+        return Departement::getDepartementParId($id);
+    }
+
+    /**
+     * Vérifie si un identifiant de département existe bien en base
+     * @param int $id
+     * @return bool
+     */
+    public function existeDepartementId(int $id): bool {
+        return Departement::existeId($id);
     }
 }
