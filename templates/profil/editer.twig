@@ -28,6 +28,15 @@
                 <input type="text" name="description" id="description" placeholder="{{ profil.description }}" maxlength="300"/>
             </div>
             <div class="message info">
+                La newsletter est envoyée une fois par semaine avec le nom des nouveaux inscrits de la semaine et la liste des personnes de votre liste d'amis dans votre département d'activité
+            </div>
+            <div class="champ checkbox">
+                <label for="newsletter">
+                    S'inscrire à la newsletter
+                </label>
+                <input type="checkbox" name="newsletter" id="newsletter" {% if profil.newsletter %}checked{% endif %}/>
+            </div>
+            <div class="message info">
                 Le changement d'email n'est pas encore implémenté.
             </div>
             <div class="champ">

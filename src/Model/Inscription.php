@@ -131,7 +131,7 @@ class Inscription extends Model {
                 $inscription->supprime();
                 throw new InscriptionDelaiException('Délai de validation de l\'inscription dépassé, veuillez renouveler votre inscription.');
             }
-            $profil = new Profil($inscription->nom, $inscription->prenom, $inscription->mdp, $inscription->mail, []);
+            $profil = new Profil($inscription->nom, $inscription->prenom, $inscription->mdp, $inscription->mail, [], 0);
             if ($profil->sauvegarde()) {
                 return $inscription->supprime();
             }

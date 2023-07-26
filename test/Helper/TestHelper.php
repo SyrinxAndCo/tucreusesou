@@ -24,6 +24,7 @@ class TestHelper {
             password_hash('mdp', PASSWORD_DEFAULT),
             'mail',
             [],
+            0,
             'description',
             new Contrat(
                 0,

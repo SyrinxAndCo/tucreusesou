@@ -342,6 +342,14 @@ button {
       padding: 5px 10px;
     }
   }
+
+  .checkbox {
+    text-align: center;
+
+    label, input {
+      display: inline;
+    }
+  }
 }
 
 // CSS par défaut pour les mobiles pompé ici : https://www.alsacreations.com/astuce/lire/1177-Une-feuille-de-styles-de-base-pour-le-Web-mobile.html

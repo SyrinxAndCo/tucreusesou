@@ -52,4 +52,36 @@ class Mailer {
             echo $e->getMessage(), PHP_EOL;
         }
     }
+
+    /**
+     * Envoie la newsletter
+     * @param string $nom
+     * @param string $mail
+     * @param string $content
+     * @return void
+     */
+    public function envoieMailNewsletter(string $nom, string $mail, string $content): void {
+        $sendSmtpEmail = new SendSmtpEmail([
+            'sender' => ['name' => 'No Reply - Tu Creuses Où ?', 'email' => 'no-reply@tucreusesou.fr'],
+            'to' => [['name' => $nom, 'email' => $mail]],
+            'htmlContent' => $content,
+            'subject' => 'Newsletter - Tu Creuses Où ?'
+        ]);
+
+        try {
+            $this->api->sendTransacEmail($sendSmtpEmail);
+        } catch (Exception $e) {
+            echo $e->getMessage(), PHP_EOL;
+        }
+    }
+// Note pour plus tard
+//        $this->view->parsePart(
+//            'mails/newsletter.twig',
+//            [
+//                'dateDebut' => time() - 60 * 60 * 24 * 6,
+//                'dateFin' => time(),
+//                'nouveauxMembres' => Profil::getProfilsInscritsDepuis(time() - 60 * 60 * 24 * 6),
+//                'profil' => $this->profil
+//            ]
+//        )
 }

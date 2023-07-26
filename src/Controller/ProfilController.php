@@ -190,6 +190,11 @@ class ProfilController extends Controller {
                     }
                 }
             }
+            if (isset($_POST['newsletter'])) {
+                $this->profil->setNewsletter(true);
+            } else {
+                $this->profil->setNewsletter(false);
+            }
             if (!isset($_SESSION[self::NOM_SESSION_ERREUR_PROFIL])) {
                 $this->profil->sauvegarde();
                 $this->redirect('/profil');

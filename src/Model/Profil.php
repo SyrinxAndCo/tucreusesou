@@ -13,16 +13,22 @@ class Profil extends Model {
     private string $mail;
     private array $amis;
     private ?Contrat $contrat;
+    private bool $avatar;
+    private bool $newsletter;
+    private int $creation;
 
     public function __construct(
-        string  $nom,
-        string  $prenom,
-        string  $mdp,
-        string  $mail,
-        array   $amis,
-        ?string $description = null,
+        string   $nom,
+        string   $prenom,
+        string   $mdp,
+        string   $mail,
+        array    $amis,
+        int $creation,
+        ?string  $description = null,
         ?Contrat $contrat = null,
-        ?int     $id = null
+        ?int     $id = null,
+        bool     $avatar = false,
+        bool     $newsletter = false
     ) {
         $this->id = $id;
         $this->nom = $nom;
@@ -32,6 +38,9 @@ class Profil extends Model {
         $this->mail = $mail;
         $this->amis = $amis;
         $this->contrat = $contrat;
+        $this->avatar = $avatar;
+        $this->newsletter = $newsletter;
+        $this->creation = $creation;
         parent::__construct();
     }
 
@@ -41,7 +50,20 @@ class Profil extends Model {
      * @return Profil|null null en cas d'échec
      */
     public static function getProfilParId(int $id): ?Profil {
-        $query = self::getDB()->prepare('SELECT ' . self::TABLE . '.id, ' . self::TABLE . '.nom, ' . self::TABLE . '.prenom, ' . self::TABLE . '.mdp, ' . self::TABLE . '.mail, ' . self::TABLE . '.description, ' . self::TABLE_AMIS . '.idAmi FROM ' . self::TABLE . ' LEFT JOIN ' . self::TABLE_AMIS . ' ON ' . self::TABLE . '.id = ' . self::TABLE_AMIS . '.idSource WHERE ' . self::TABLE . '.id = :id');
+        $query = self::getDB()->prepare(
+            'SELECT ' .
+            self::TABLE . '.id, ' .
+            self::TABLE . '.nom, ' .
+            self::TABLE . '.prenom, ' .
+            self::TABLE . '.mdp, ' .
+            self::TABLE . '.mail, ' .
+            self::TABLE . '.description, ' .
+            self::TABLE . '.avatar, ' .
+            self::TABLE . '.newsletter, ' .
+            self::TABLE . '.creation, ' .
+            self::TABLE_AMIS . '.idAmi ' .
+            'FROM ' . self::TABLE . ' LEFT JOIN ' . self::TABLE_AMIS . ' ON ' . self::TABLE . '.id = ' . self::TABLE_AMIS . '.idSource WHERE ' . self::TABLE . '.id = :id'
+        );
         if ($query) {
             if ($query->execute(['id' => $id])) {
                 $profils = $query->fetchAll();
@@ -52,7 +74,19 @@ class Profil extends Model {
                             $amis[] = $profil['idAmi'];
                         }
                     }
-                    return new Profil($profils[0]['nom'], $profils[0]['prenom'], $profils[0]['mdp'], $profils[0]['mail'], $amis, $profils[0]['description'], Contrat::getContratParIdProfil($profils[0]['id']), $profils[0]['id']);
+                    return new Profil(
+                        $profils[0]['nom'],
+                        $profils[0]['prenom'],
+                        $profils[0]['mdp'],
+                        $profils[0]['mail'],
+                        $amis,
+                        $profils[0]['creation'],
+                        $profils[0]['description'],
+                        Contrat::getContratParIdProfil($profils[0]['id']),
+                        $profils[0]['id'],
+                        $profils[0]['avatar'],
+                        $profils[0]['newsletter']
+                    );
                 }
             }
         }
@@ -85,7 +119,7 @@ class Profil extends Model {
      */
     public function sauvegarde(): bool {
         if ($this->id) {
-            $query = self::getDB()->prepare('UPDATE ' . self::TABLE . ' SET nom = :nom, prenom = :prenom, mdp = :mdp, mail = :mail, description = :description WHERE id = :id');
+            $query = self::getDB()->prepare('UPDATE ' . self::TABLE . ' SET nom = :nom, prenom = :prenom, mdp = :mdp, mail = :mail, description = :description, avatar = :avatar, newsletter = :newsletter WHERE id = :id');
             return $query && $query->execute(
                     [
                         'nom' => $this->nom,
@@ -93,18 +127,21 @@ class Profil extends Model {
                         'mdp' => $this->mdp,
                         'mail' => $this->mail,
                         'description' => $this->description,
-                        'id' => $this->id
+                        'id' => $this->id,
+                        'avatar' => $this->avatar ? '1' : '0',
+                        'newsletter' => $this->newsletter ? '1' : '0'
                     ]
                 );
         } else {
-            $query = self::getDB()->prepare('INSERT INTO ' . self::TABLE . '(nom, prenom, mdp, mail, description) VALUES (:nom, :prenom, :mdp, :mail, :description)');
+            $query = self::getDB()->prepare('INSERT INTO ' . self::TABLE . '(nom, prenom, mdp, mail, description, creation) VALUES (:nom, :prenom, :mdp, :mail, :description, :creation)');
             return $query && $query->execute(
                     [
                         'nom' => $this->nom,
                         'prenom' => $this->prenom,
                         'mdp' => $this->mdp,
                         'mail' => $this->mail,
-                        'description' => $this->description
+                        'description' => $this->description,
+                        'creation' => time()
                     ]
                 );
         }
@@ -274,6 +311,28 @@ class Profil extends Model {
     }
 
     /**
+     * Renvoie la liste de tous les profils créés depuis la date passée en paramètre
+     * @param int $date
+     * @return array
+     */
+    public static function getProfilsInscritsDepuis(int $date): array {
+        $query = self::getDB()->prepare(
+            'SELECT id FROM ' . self::TABLE . ' WHERE creation >= :creation ORDER BY nom ASC'
+        );
+        if ($query) {
+            if ($query->execute(['creation' => $date])) {
+                $res = $query->fetchAll();
+                $listeProfils = [];
+                foreach ($res as $profil) {
+                    $listeProfils[$profil['id']] = Profil::getProfilParId($profil['id']);
+                }
+                return $listeProfils;
+            }
+        }
+        return [];
+    }
+
+    /**
      * @return ?int
      */
     public function getId(): ?int {
@@ -383,5 +442,47 @@ class Profil extends Model {
      */
     public function setContrat(Contrat $contrat): void {
         $this->contrat = $contrat;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isNewsletter(): bool {
+        return $this->newsletter;
+    }
+
+    /**
+     * @param bool $newsletter
+     */
+    public function setNewsletter(bool $newsletter): void {
+        $this->newsletter = $newsletter;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAvatar(): bool {
+        return $this->avatar;
+    }
+
+    /**
+     * @param bool $avatar
+     */
+    public function setAvatar(bool $avatar): void {
+        $this->avatar = $avatar;
+    }
+
+    /**
+     * @return int
+     */
+    public function getCreation(): int {
+        return $this->creation;
+    }
+
+    /**
+     * @param int $creation
+     */
+    public function setCreation(int $creation): void {
+        $this->creation = $creation;
     }
 }

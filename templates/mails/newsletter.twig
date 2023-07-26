@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="fr-FR">
+<head>
+    <title>Newsletter - Tu Creuses Où ?</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Tu creuses où ?">
+</head>
+<body>
+<div id="corps">
+    <h1>Newsletter - Tu Creuses Où ?</h1>
+    <div>
+        <h2>Nouveaux membres</h2>
+        {% if nouveauxMembres|length > 1 %}
+            <div>
+                En cette semaine du {{ dateDebut|date('D d F Y')|format_date('full', locale='fr') }} au {{ dateFin|date('D d F Y')|format_date('full', locale='fr') }}, nous avons
+                accueilli {{ nouveauxMembres|length }} nouveaux membres.
+            </div>
+            <div>
+                Ceux-ci sont :
+            </div>
+            <ul>
+                {% for membre in nouveauxMembres %}
+                    <li>
+                        {{ membre.prenom }} {{ membre.nom }} {% if membre.description %} <span style="font-style: italic">"{{ membre.description }}"</span> {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+            <div>
+                Bienvenue à eux !
+            </div>
+        {% elseif nouveauxMembres|length == 1 %}
+            <div>
+                En cette semaine du {{ dateDebut|date('D d F Y')|format_date('full', locale='fr') }} au {{ dateFin|date('D d F Y')|format_date('full', locale='fr') }}, nous avons
+                accueilli un seul nouveau membre.
+            </div>
+            <div>
+                Bienvenue
+                {% for membre in nouveauxMembres %}
+                    {{ membre.prenom }} {{ membre.nom }} {% if membre.description %} <span style="font-style: italic">"{{ membre.description }}"</span> {% endif %}
+                {% endfor %}
+                !
+            </div>
+        {% else %}
+            Nous n'avons accueilli aucun nouveau membre durant la semaine du {{ dateDebut|date('D d F Y')|format_date('full', locale='fr') }} au {{ dateFin|date('D d F Y')|format_date('full', locale='fr') }}.
+        {% endif %}
+    </div>
+    <h2>Amis dans le même département</h2>
+    {% if profil.contrat %}
+        {% set listeAmis = profil.profilsAmis|filter(v => profil.estAmitie(v.id) and profil.contrat.departement.id == v.contrat.departement.id and (not v.contrat.dateFin or v.contrat.dateFin > 'now'|date('U'))) %}
+        {% if listeAmis|length > 0 %}
+            <div>
+                Parmi votre liste d'amis, vous avez {{ listeAmis|length }} amis dans le même département.
+            </div>
+            <div>
+                Ceux-ci sont :
+            </div>
+            <ul>
+                {% for ami in listeAmis %}
+                    <li>
+                        {{ ami.prenom }} {{ ami.nom }} {% if ami.description %} <span style="font-style: italic">"{{ ami.description }}"</span> {% endif %}
+                        {% if ami.contrat.dateFin %}
+                            jusqu'au {{ ami.contrat.dateFin|date('D d F Y')|format_date('full', locale='fr') }}
+                        {% else %}
+                            pour une durée indéterminée
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div>
+                Vous n'avez actuellement personne dans votre liste d'amis dans le même département.
+            </div>
+        {% endif %}
+    {% else %}
+        <div>
+            Pour avoir la liste de vos amis dans le même département, vous devez renseigner un CDD, un CDI ou un lieu de séjour sur <a href="https://tucreusesou.fr/" target="_blank">Tu Creuses Où
+                ?</a>.
+        </div>
+    {% endif %}
+</div>
+</body>
+</html>
