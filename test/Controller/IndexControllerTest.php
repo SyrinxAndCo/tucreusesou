@@ -1,11 +1,5 @@
 <?php
 
-namespace TuCreusesOu\Controller;
-
-function uniqid(): string {
-    return 'token';
-}
-
 namespace TuCreusesOu\Test\Controller;
 
 use PHPUnit\Framework\TestCase;
@@ -13,9 +7,8 @@ use TuCreusesOu\Controller\IndexController;
 use TuCreusesOu\Enum\Erreurs;
 use TuCreusesOu\Enum\ViewBlocks;
 use TuCreusesOu\Helper\ModelsHelper;
-use TuCreusesOu\Model\Contrat;
-use TuCreusesOu\Model\Departement;
 use TuCreusesOu\Model\Profil;
+use TuCreusesOu\Test\Helper\TestHelper;
 use TuCreusesOu\View\IndexView;
 
 class IndexControllerTest extends TestCase {
@@ -25,27 +18,7 @@ class IndexControllerTest extends TestCase {
     private Profil $defaultProfil;
 
     public function __construct(?string $name = null, array $data = [], $dataName = '') {
-        $this->defaultProfil = new Profil(
-            'nom',
-            'prenom',
-            password_hash('mdp', PASSWORD_DEFAULT),
-            'mail',
-            [],
-            'description',
-            new Contrat(
-                0,
-                0,
-                0,
-                new Departement(
-                    0,
-                    'numero',
-                    'nom'
-                ),
-                true,
-                0
-            ),
-            0
-        );
+        $this->defaultProfil = TestHelper::defaultProfil();
         parent::__construct($name, $data, $dataName);
     }
 

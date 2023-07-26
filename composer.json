@@ -32,6 +32,7 @@
     "scripts": {
         "test": "php ./vendor/phpunit/phpunit/phpunit --verbose test --coverage-html coverage --coverage-filter src",
         "test-docker": "docker-compose -f docker/docker-compose.yml exec php ./composer.phar test",
-        "start": "docker-compose -f docker/docker-compose.yml up -d"
+        "start": "docker-compose -f docker/docker-compose.yml up -d",
+        "stop": "docker-compose -f docker/docker-compose.yml down"
     }
 }

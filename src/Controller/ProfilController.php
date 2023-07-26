@@ -14,22 +14,24 @@ use TuCreusesOu\View\ProfilView;
 class ProfilController extends Controller {
     private ?Profil $profil;
     private array $paramsView = [];
-    private const NOM_SESSION_TOKEN_PROFIL = 'tokenProfil';
-    const NOM_SESSION_ERREUR_PROFIL = 'erreurProfil';
+    public const NOM_SESSION_TOKEN_PROFIL = 'tokenProfil';
+    public const NOM_SESSION_ERREUR_PROFIL = 'erreurProfil';
 
     public function __construct(?ProfilView $view, ?ModelsHelper $modelsHelper) {
+        parent::__construct($view ?? new ProfilView(), $modelsHelper);
         if (!isset($_SESSION['profil'])) {
             $this->redirect('/');
+        } else {
+            $this->profil = $this->modelsHelper->getProfilParId($_SESSION['profil']->getId());
+            if ($this->profil === null) {
+                $this->redirect('/');
+            } else {
+                if (isset($_SESSION[self::NOM_SESSION_ERREUR_PROFIL])) {
+                    $this->paramsView['erreur'] = $this->getMessageErreur($_SESSION[self::NOM_SESSION_ERREUR_PROFIL]);
+                    unset($_SESSION[self::NOM_SESSION_ERREUR_PROFIL]);
+                }
+            }
         }
-        $this->profil = Profil::getProfilParId($_SESSION['profil']->getId());
-        if ($this->profil === null) {
-            $this->redirect('/');
-        }
-        if (isset($_SESSION[self::NOM_SESSION_ERREUR_PROFIL])) {
-            $this->paramsView['erreur'] = $this->getMessageErreur($_SESSION[self::NOM_SESSION_ERREUR_PROFIL]);
-            unset($_SESSION[self::NOM_SESSION_ERREUR_PROFIL]);
-        }
-        parent::__construct($view ?? new ProfilView(), $modelsHelper);
     }
 
     /**
@@ -76,120 +78,123 @@ class ProfilController extends Controller {
         if (!isset($_POST['token']) || !isset($_SESSION[self::NOM_SESSION_TOKEN_PROFIL]) || $_POST['token'] !== $_SESSION[self::NOM_SESSION_TOKEN_PROFIL]) {
             $_SESSION[self::NOM_SESSION_ERREUR_PROFIL] = Erreurs::FORMULAIRE_NON_VALIDE;
             $this->redirect('/profil');
-        }
-        if (isset($_POST['supprimerAmi'])) {
+        } elseif (isset($_POST['supprimerAmi'])) {
             if (!preg_match('/\d+/', $_POST['supprimerAmi'])) {
                 $_SESSION[self::NOM_SESSION_ERREUR_PROFIL] = Erreurs::IDENTIFIANT_AMI_INCONNU;
-                $this->redirect('/profil/listeAmis');
+            } else {
+                $this->profil->retireAmi($_POST['supprimerAmi']);
             }
-            $this->profil->retireAmi($_POST['supprimerAmi']);
             $this->redirect('/profil/listeAmis');
-        }
-        if (isset($_POST['ajouterAmi'])) {
+        } elseif (isset($_POST['ajouterAmi'])) {
             if (!preg_match('/\d+/', $_POST['ajouterAmi'])) {
                 $_SESSION[self::NOM_SESSION_ERREUR_PROFIL] = Erreurs::IDENTIFIANT_AMI_INCONNU;
-                $this->redirect('/profil/listeAmis');
+            } else {
+                $this->profil->ajouteAmi($_POST['ajouterAmi']);
             }
-            $this->profil->ajouteAmi($_POST['ajouterAmi']);
             $this->redirect('/profil/listeAmis');
-        }
-        if (isset($_POST['supprimerProfil'])) {
+        } elseif (isset($_POST['supprimerProfil'])) {
             if (!isset($_POST['mdp']) || !password_verify($_POST['mdp'], $this->profil->getMdp())) {
                 $_SESSION[self::NOM_SESSION_ERREUR_PROFIL] = Erreurs::MAUVAIS_MDP;
                 $this->redirect('/profil/supprimer');
+            } else {
+                $this->profil->supprime();
+                session_destroy();
+                $this->redirect('/');
             }
-            $this->profil->supprime();
-            session_destroy();
-            $this->redirect('/');
-        }
-        if (isset($_POST['supprimerContrat'])) {
+        } elseif (isset($_POST['supprimerContrat'])) {
             $this->profil->getContrat()?->supprime();
-        }
-        if (isset($_POST['editerProfil'])) {
+            $this->redirect('/profil');
+        } elseif (isset($_POST['editerProfil'])) {
             if (isset($_POST['mdp']) && $_POST['mdp'] !== "") {
                 if (!isset($_POST['mdp2'])) {
                     $_SESSION[self::NOM_SESSION_ERREUR_PROFIL] = Erreurs::CHAMP_MDP_MANQUANT;
                     $this->redirect('/profil/editer');
-                }
-                if ($_POST['mdp'] !== $_POST['mdp2']) {
+                } elseif ($_POST['mdp'] !== $_POST['mdp2']) {
                     $_SESSION[self::NOM_SESSION_ERREUR_PROFIL] = Erreurs::MOT_DE_PASSE_DIFFERENT;
                     $this->redirect('/profil/editer');
-                }
-                if (!preg_match(Constantes::REGEX_TEXT, $_POST['mdp'])) {
+                } elseif (!preg_match(Constantes::REGEX_TEXT, $_POST['mdp'])) {
                     $_SESSION[self::NOM_SESSION_ERREUR_PROFIL] = Erreurs::MDP_INTERDIT;
                     $this->redirect('/profil/editer');
-                }
-                if (strlen($_POST['mdp']) < 8) {
+                } elseif (strlen($_POST['mdp']) < 8) {
                     $_SESSION[self::NOM_SESSION_ERREUR_PROFIL] = Erreurs::MDP_TROP_COURT;
                     $this->redirect('/profil/editer');
+                } else {
+                    $this->profil->setMdp(password_hash($_POST['mdp'], PASSWORD_DEFAULT));
                 }
-                $this->profil->setMdp(password_hash($_POST['mdp'], PASSWORD_DEFAULT));
             }
             if (isset($_POST['nom']) && $_POST['nom'] !== "") {
                 if (!preg_match(Constantes::REGEX_NOM, $_POST['nom'])) {
                     $_SESSION[self::NOM_SESSION_ERREUR_PROFIL] = Erreurs::CARACTERES_INTERDITS_NOM;
                     $this->redirect('/profil/editer');
+                } else {
+                    $this->profil->setNom($_POST['nom']);
                 }
-                $this->profil->setNom($_POST['nom']);
             }
             if (isset($_POST['prenom']) && $_POST['prenom'] !== "") {
                 if (!preg_match(Constantes::REGEX_NOM, $_POST['prenom'])) {
                     $_SESSION[self::NOM_SESSION_ERREUR_PROFIL] = Erreurs::CARACTERES_INTERDITS_NOM;
                     $this->redirect('/profil/editer');
+                } else {
+                    $this->profil->setPrenom($_POST['prenom']);
                 }
-                $this->profil->setPrenom($_POST['prenom']);
             }
             if (isset($_POST['description']) && $_POST['description'] !== "") {
                 if (!preg_match(Constantes::REGEX_TEXT, $_POST['description'])) {
                     $_SESSION[self::NOM_SESSION_ERREUR_PROFIL] = Erreurs::CARACTERES_INTERDITS_DESCRIPTION;
                     $this->redirect('/profil/editer');
-                }
-                if (strlen($_POST['description']) > 300) {
+                } elseif (strlen($_POST['description']) > 300) {
                     $_SESSION[self::NOM_SESSION_ERREUR_PROFIL] = Erreurs::DESCRIPTION_TROP_LONGUE;
                     $this->redirect('/profil/editer');
+                } else {
+                    $this->profil->setDescription($_POST['description']);
                 }
-                $this->profil->setDescription($_POST['description']);
             }
             if (isset($_POST['dateDebut']) && $_POST['dateDebut'] !== "") {
-                if (!preg_match(Constantes::REGEX_DATE, $_POST['dateDebut']) || !strtotime($_POST['dateDebut']) || strtotime($_POST['dateDebut']) < 0) {
+                if (!preg_match(Constantes::REGEX_DATE, $_POST['dateDebut']) || strtotime($_POST['dateDebut']) < 0) {
                     $_SESSION[self::NOM_SESSION_ERREUR_PROFIL] = Erreurs::DATE_INVALIDE;
                     $this->redirect('/profil/editer');
-                }
-                $dateDebut = strtotime($_POST['dateDebut']);
-                if (!isset($_POST['cdi']) && isset($_POST['enActivite'])) {
-                    if (!isset($_POST['dateFin'])) {
-                        $_SESSION[self::NOM_SESSION_ERREUR_PROFIL] = Erreurs::CDD_SANS_FIN;
-                        $this->redirect('/profil/editer');
-                    }
-                    if (!preg_match(Constantes::REGEX_DATE, $_POST['dateFin']) || !strtotime($_POST['dateFin']) || strtotime($_POST['dateFin']) < 0) {
-                        $_SESSION[self::NOM_SESSION_ERREUR_PROFIL] = Erreurs::DATE_INVALIDE;
-                        $this->redirect('/profil/editer');
-                    }
-                    $dateFin = strtotime($_POST['dateFin']);
-                    if ($dateFin < time()) {
-                        $_SESSION[self::NOM_SESSION_ERREUR_PROFIL] = Erreurs::DATE_FIN_PASSEE;
-                        $this->redirect('/profil/editer');
-                    }
                 } else {
-                    $dateFin = null;
+                    $dateDebut = strtotime($_POST['dateDebut']);
+                    if (!isset($_POST['cdi']) && isset($_POST['enActivite'])) {
+                        if (!isset($_POST['dateFin'])) {
+                            $_SESSION[self::NOM_SESSION_ERREUR_PROFIL] = Erreurs::CDD_SANS_FIN;
+                            $this->redirect('/profil/editer');
+                        } elseif (!preg_match(Constantes::REGEX_DATE, $_POST['dateFin']) || strtotime($_POST['dateFin']) < 0) {
+                            $_SESSION[self::NOM_SESSION_ERREUR_PROFIL] = Erreurs::DATE_INVALIDE;
+                            $this->redirect('/profil/editer');
+                        } else {
+                            $dateFin = strtotime($_POST['dateFin']);
+                            if ($dateFin < time()) {
+                                $_SESSION[self::NOM_SESSION_ERREUR_PROFIL] = Erreurs::DATE_FIN_PASSEE;
+                                $this->redirect('/profil/editer');
+                            }
+                        }
+                    } else {
+                        $dateFin = null;
+                    }
+                    if (!isset($_SESSION[self::NOM_SESSION_ERREUR_PROFIL])) {
+                        if (!isset($_POST['idDepartement'])) {
+                            $_SESSION[self::NOM_SESSION_ERREUR_PROFIL] = Erreurs::CHAMP_MANQUANT;
+                            $this->redirect('/profil/editer');
+                        } elseif (!is_numeric($_POST['idDepartement']) || !$this->modelsHelper->existeDepartementId($_POST['idDepartement'])) {
+                            $_SESSION[self::NOM_SESSION_ERREUR_PROFIL] = Erreurs::DEPARTEMENT_INCONNU;
+                            $this->redirect('/profil/editer');
+                        } else {
+                            $contrat = $this->profil->getContrat() ?? new Contrat($this->profil->getId(), 0, null, new Departement(-1, '', ''), true);
+                            $contrat->setDateDebut($dateDebut);
+                            $contrat->setDateFin($dateFin);
+                            $contrat->setDepartement($this->modelsHelper->getDepartementParId($_POST['idDepartement']));
+                            $contrat->setEnActivite(isset($_POST['enActivite']));
+                            $contrat->sauvegarde();
+                        }
+                    }
                 }
-                if (!isset($_POST['idDepartement'])) {
-                    $_SESSION[self::NOM_SESSION_ERREUR_PROFIL] = Erreurs::CHAMP_MANQUANT;
-                    $this->redirect('/profil/editer');
-                } elseif (!is_numeric($_POST['idDepartement']) || !Departement::existeId($_POST['idDepartement'])) {
-                    $_SESSION[self::NOM_SESSION_ERREUR_PROFIL] = Erreurs::DEPARTEMENT_INCONNU;
-                    $this->redirect('/profil/editer');
-                }
-                $contrat = $this->profil->getContrat() ?? new Contrat($this->profil->getId(), 0, null, Departement::getDepartementParId(1), true);
-                $contrat->setDateDebut($dateDebut);
-                $contrat->setDateFin($dateFin);
-                $contrat->setDepartement(Departement::getDepartementParId($_POST['idDepartement']));
-                $contrat->setEnActivite(isset($_POST['enActivite']));
-                $contrat->sauvegarde();
             }
-            $this->profil->sauvegarde();
+            if (!isset($_SESSION[self::NOM_SESSION_ERREUR_PROFIL])) {
+                $this->profil->sauvegarde();
+                $this->redirect('/profil');
+            }
         }
-        $this->redirect('/profil');
     }
 
     /**
@@ -216,7 +221,7 @@ class ProfilController extends Controller {
         $_SESSION[self::NOM_SESSION_TOKEN_PROFIL] = uniqid();
         $this->paramsView['token'] = $_SESSION[self::NOM_SESSION_TOKEN_PROFIL];
         $this->paramsView['profil'] = $this->profil;
-        $this->paramsView['listeDepartements'] = Departement::getTousDepartements();
+        $this->paramsView['listeDepartements'] = $this->modelsHelper->getTousDepartements();
         $this->view->setTemplate(
             ViewBlocks::CONTENU,
             'profil/editer.twig',
@@ -260,5 +265,13 @@ class ProfilController extends Controller {
             Erreurs::DEPARTEMENT_INCONNU => "Le département renseigné est inconnu.",
             default => ""
         };
+    }
+
+    /**
+     * Renvoie les paramètres passés à la vue
+     * @return array
+     */
+    public function getParamsView(): array {
+        return $this->paramsView;
     }
 }
