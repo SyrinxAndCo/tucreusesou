@@ -35,5 +35,7 @@ abstract class Controller {
         }
     }
 
-    abstract protected function getMessageErreur(Erreurs $erreur): string;
+    protected function getMessageErreur(Erreurs $erreur): string {
+        return "";
+    }
 }
