@@ -333,6 +333,25 @@ class Profil extends Model {
     }
 
     /**
+     * Renvoie la liste de tous les profils enregistrés inscrits à la newsletter
+     * @return array
+     */
+    public static function getProfilsNewsletter(): array {
+        $query = self::getDB()->prepare('SELECT id FROM ' . self::TABLE . ' WHERE newsletter');
+        if ($query) {
+            if ($query->execute()) {
+                $res = $query->fetchAll();
+                $listeProfils = [];
+                foreach ($res as $profil) {
+                    $listeProfils[$profil['id']] = Profil::getProfilParId($profil['id']);
+                }
+                return $listeProfils;
+            }
+        }
+        return [];
+    }
+
+    /**
      * @return ?int
      */
     public function getId(): ?int {
