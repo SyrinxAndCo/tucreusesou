@@ -26,4 +26,7 @@ enum Erreurs {
     case CDD_SANS_FIN;
     case DATE_FIN_PASSEE;
     case DEPARTEMENT_INCONNU;
+    case TYPE_IMAGE_NON_CONFORME;
+    case IMAGE_TROP_GROSSE;
+    case IMAGE_ERREUR_INCONNUE;
 }

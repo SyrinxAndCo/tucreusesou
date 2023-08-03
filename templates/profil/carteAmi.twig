@@ -1,8 +1,13 @@
 <div class="carteAmi">
-    <div class="nomEtPrenom">
-        {{ ami.prenom }} {{ ami.nom }}
-    </div>
-    <div class="description">
-        {{ ami.description ?? 'Aucune description fournie' }}
+    {% if ami.isAvatar %}
+        <img src="{{ ami.avatar }}" alt="Avatar de {{ ami.prenom }} {{ ami.nom }}" class="avatar">
+    {% endif %}
+    <div class="texteCarteAmi">
+        <div class="nomEtPrenom">
+            {{ ami.prenom }} {{ ami.nom }}
+        </div>
+        <div class="description">
+            {{ ami.description ?? 'Aucune description fournie' }}
+        </div>
     </div>
 </div>

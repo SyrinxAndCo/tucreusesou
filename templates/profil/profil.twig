@@ -1,6 +1,15 @@
 {% block profil %}
     <div class="profil">
         {{ include('blocs/erreur.twig', {erreur: erreur}, with_context = false) }}
+        {% if profil.isAvatar %}
+            <a href="/profil/avatar" class="avatar">
+                <img src="{{ profil.avatar }}" alt="Avatar de {{ profil.prenom }} {{ profil.nom }}">
+            </a>
+        {% else %}
+            <button class="boutonLien boutonAvatar" type="button">
+                <a href="/profil/avatar">Ajouter un avatar</a>
+            </button>
+        {% endif %}
         <div class="nomPrenom">
             {{ profil.prenom }} {{ profil.nom }}
         </div>

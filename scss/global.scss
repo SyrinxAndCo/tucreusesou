@@ -46,6 +46,19 @@ body {
 .profil {
   width: 100%;
 
+  .boutonAvatar {
+    margin: auto auto 10px;
+    width: fit-content;
+    display: block;
+    height: 30px;
+  }
+
+  .avatar {
+    margin: 15px auto;
+    display: block;
+    width: fit-content;
+  }
+
   .nomPrenom {
     text-align: center;
     font-size: 200%;
@@ -146,6 +159,14 @@ body {
   padding: 5px 10px;
 }
 
+.boutonSupprimer {
+  display: block;
+  margin: 20px auto;
+  font-weight: bold;
+  padding: 5px 10px;
+  color: darkred;
+}
+
 #contenu {
   display: flex;
   width: 100%;
@@ -233,6 +254,7 @@ button {
 
     .ami {
       display: flex;
+      padding: 3px 0;
 
       &.ligne1 {
         background-color: rgb(50, 50, 50);
@@ -244,6 +266,8 @@ button {
 
       .carteAmi {
         width: 100%;
+        margin-bottom: 0;
+        padding-left: 3px;
       }
 
       .supprimerAmi {
@@ -269,11 +293,21 @@ button {
   padding-left: 10px;
   margin-bottom: 5px;
   box-sizing: border-box;
+  display: flex;
+  align-items: center;
 
-  .description {
-    font-style: italic;
-    font-size: 80%;
-    margin-left: 10px;
+  .avatar {
+    max-width: 40px;
+    max-height: 40px;
+    margin: 0 3px 0 0;
+  }
+  .texteCarteAmi {
+
+    .description {
+      font-style: italic;
+      font-size: 80%;
+      margin-left: 10px;
+    }
   }
 }
 
@@ -362,6 +396,56 @@ button {
   .paragraphe {
     margin: 5px;
     font-size: 90%;
+  }
+}
+
+.avatarProfil {
+  display: flex;
+  width: 100%;
+  flex-wrap: wrap;
+
+  .retour {
+    flex-basis: 100%;
+  }
+
+  .message {
+    flex-basis: 100%;
+    text-align: center;
+    margin: 15px 0;
+  }
+
+  .avatar {
+    margin: 15px auto;
+  }
+
+  form {
+    width: 100%;
+    text-align: center;
+    .uploadAvatar {
+      width: 100%;
+      display: flex;
+      flex-wrap: wrap;
+
+      label {
+        margin-bottom: 10px;
+        display: block;
+        width: 100%;
+      }
+      input {
+        margin-bottom: 10px;
+        display: block;
+        width: 100%;
+        text-align: center;
+      }
+    }
+
+    .boutonsAvatar {
+      display: flex;
+      button {
+        flex-basis: 50%;
+        max-width: fit-content;
+      }
+    }
   }
 }
 

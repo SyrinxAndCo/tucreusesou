@@ -357,6 +357,24 @@ class ProfilControllerTest extends TestCase {
         $this->assertNull($_SESSION[ProfilController::NOM_SESSION_ERREUR_PROFIL] ?? null);
     }
 
+    public function testAvatarAction(): void {
+        $this->view->expects($this->once())
+                   ->method('setTemplate')
+                   ->with(
+                       ViewBlocks::CONTENU,
+                       'profil/avatar.twig',
+                       'avatarProfil',
+                       [
+                           'token' => 'token',
+                           'profil' => $this->profil,
+                       ]
+                   );
+        $this->view->expects($this->once())
+                   ->method('render');
+        $this->controller->avatarAction();
+        $this->assertEquals('token', $_SESSION[ProfilController::NOM_SESSION_TOKEN_PROFIL]);
+    }
+
     private function erreursMessages(): array {
         return [
             [Erreurs::FORMULAIRE_NON_VALIDE, "Votre formulaire était non valide, veuillez réessayer."],

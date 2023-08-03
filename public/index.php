@@ -9,6 +9,8 @@ use TuCreusesOu\View\IndexView;
 include_once '../vendor/autoload.php';
 include_once '../config.php';
 
+const PUBLIC_DIR = __DIR__;
+
 $requestUri = $_SERVER['REQUEST_URI'];
 
 if (!session_start()) {
