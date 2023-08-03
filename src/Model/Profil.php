@@ -497,9 +497,9 @@ class Profil extends Model {
      */
     public function getAvatar(): string {
         if (file_exists(PUBLIC_DIR . '/avatars/' . $this->id . '.jpg')) {
-            return '/avatars/' . $this->id . '.jpg';
+            return '/public/avatars/' . $this->id . '.jpg';
         } else {
-            return '/avatars/' . $this->id . '.png';
+            return '/public/avatars/' . $this->id . '.png';
         }
     }
 
