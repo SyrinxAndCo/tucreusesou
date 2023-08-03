@@ -8,6 +8,9 @@ use TuCreusesOu\TwigExtension\TwigFunctions;
 use TuCreusesOu\TwigExtension\TwigFilters;
 use Twig\Environment;
 use Twig\Error\Error;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
 use Twig\Extension\CoreExtension;
 use Twig\Extra\Intl\IntlExtension;
 use Twig\Loader\FilesystemLoader;
@@ -68,7 +71,7 @@ abstract class View {
         } catch (Error $e) {
             echo 'Grosse erreur twig....<br>';
             echo $e->getMessage() . '<br>';
-            echo 'Line ' .  $e->getLine() . ' in ' . $e->getFile();
+            echo 'Line ' . $e->getLine() . ' in ' . $e->getFile();
             die;
         }
     }
@@ -81,16 +84,32 @@ abstract class View {
      */
     public function renderPart(string $template, array $params = []): void {
         try {
-            echo $this->twig->render(
+            echo $this->parsePart(
                 $template,
                 $params
             );
         } catch (Error $e) {
             echo 'Grosse erreur twig....<br>';
             echo $e->getMessage() . '<br>';
-            echo 'Line ' .  $e->getLine() . ' in ' . $e->getFile();
+            echo 'Line ' . $e->getLine() . ' in ' . $e->getFile();
             die;
         }
+    }
+
+    /**
+     * Renvoie le résultat du parsing du template
+     * @param string $template
+     * @param array $params
+     * @return string
+     * @throws LoaderError
+     * @throws RuntimeError
+     * @throws SyntaxError
+     */
+    public function parsePart(string $template, array $params = []): string {
+        return $this->twig->render(
+            $template,
+            $params
+        );
     }
 
     /**

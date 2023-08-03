@@ -298,20 +298,14 @@ class ProfilControllerTest extends TestCase {
         $this->assertEquals($code, $_SESSION[ProfilController::NOM_SESSION_ERREUR_PROFIL]);
     }
 
-    public function testPostActionEditerProfilReussi(): void {
-        $_POST = [
-            'token' => 'token',
-            'editerProfil' => true,
-            'mdp' => 'motdepasse',
-            'mdp2' => 'motdepasse',
-            'nom' => 'nom',
-            'prenom' => 'prenom',
-            'description' => 'description',
-            'dateDebut' => $this->aujourdhui,
-            'dateFin' => $this->demain,
-            'enActivite' => true,
-            'idDepartement' => 0
-        ];
+    /**
+     * @dataProvider postReussiProfil
+     * @param array $post
+     * @param bool $newsletter
+     * @return void
+     */
+    public function testPostActionEditerProfilReussi(array $post, bool $newsletter): void {
+        $_POST = $post;
         $_SESSION[ProfilController::NOM_SESSION_TOKEN_PROFIL] = 'token';
         $this->controller->expects($this->once())
                          ->method('redirect')
@@ -327,6 +321,9 @@ class ProfilControllerTest extends TestCase {
         $this->profil->expects($this->once())
                      ->method('setDescription')
                      ->with($_POST['description']);
+        $this->profil->expects($this->once())
+                     ->method('setNewsletter')
+                     ->with($newsletter);
         $contrat = $this->createMock(Contrat::class);
         $contrat->expects($this->once())
                 ->method('setDateDebut')
@@ -358,6 +355,24 @@ class ProfilControllerTest extends TestCase {
                      ->method('sauvegarde');
         $this->controller->postAction();
         $this->assertNull($_SESSION[ProfilController::NOM_SESSION_ERREUR_PROFIL] ?? null);
+    }
+
+    public function testAvatarAction(): void {
+        $this->view->expects($this->once())
+                   ->method('setTemplate')
+                   ->with(
+                       ViewBlocks::CONTENU,
+                       'profil/avatar.twig',
+                       'avatarProfil',
+                       [
+                           'token' => 'token',
+                           'profil' => $this->profil,
+                       ]
+                   );
+        $this->view->expects($this->once())
+                   ->method('render');
+        $this->controller->avatarAction();
+        $this->assertEquals('token', $_SESSION[ProfilController::NOM_SESSION_TOKEN_PROFIL]);
     }
 
     private function erreursMessages(): array {
@@ -585,6 +600,44 @@ class ProfilControllerTest extends TestCase {
                     'idDepartement' => 0
                 ],
                 Erreurs::DEPARTEMENT_INCONNU
+            ]
+        ];
+    }
+
+    private function postReussiProfil(): array {
+        return [
+            [
+                [
+                    'token' => 'token',
+                    'editerProfil' => true,
+                    'mdp' => 'motdepasse',
+                    'mdp2' => 'motdepasse',
+                    'nom' => 'nom',
+                    'prenom' => 'prenom',
+                    'description' => 'description',
+                    'dateDebut' => $this->aujourdhui,
+                    'dateFin' => $this->demain,
+                    'enActivite' => true,
+                    'idDepartement' => 0,
+                    'newsletter' => true,
+                ],
+                true
+            ],
+            [
+                [
+                    'token' => 'token',
+                    'editerProfil' => true,
+                    'mdp' => 'motdepasse',
+                    'mdp2' => 'motdepasse',
+                    'nom' => 'nom',
+                    'prenom' => 'prenom',
+                    'description' => 'description',
+                    'dateDebut' => $this->aujourdhui,
+                    'dateFin' => $this->demain,
+                    'enActivite' => true,
+                    'idDepartement' => 0
+                ],
+                false
             ]
         ];
     }

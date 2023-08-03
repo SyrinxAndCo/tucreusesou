@@ -2,6 +2,7 @@
 
 namespace TuCreusesOu\Controller;
 
+use finfo;
 use TuCreusesOu\Enum\Erreurs;
 use TuCreusesOu\Enum\ViewBlocks;
 use TuCreusesOu\Helper\Constantes;
@@ -16,6 +17,7 @@ class ProfilController extends Controller {
     private array $paramsView = [];
     public const NOM_SESSION_TOKEN_PROFIL = 'tokenProfil';
     public const NOM_SESSION_ERREUR_PROFIL = 'erreurProfil';
+    public const AVATAR_DIR = PUBLIC_DIR . '/avatars/';
 
     public function __construct(?ProfilView $view, ?ModelsHelper $modelsHelper) {
         parent::__construct($view ?? new ProfilView(), $modelsHelper);
@@ -190,6 +192,11 @@ class ProfilController extends Controller {
                     }
                 }
             }
+            if (isset($_POST['newsletter'])) {
+                $this->profil->setNewsletter(true);
+            } else {
+                $this->profil->setNewsletter(false);
+            }
             if (!isset($_SESSION[self::NOM_SESSION_ERREUR_PROFIL])) {
                 $this->profil->sauvegarde();
                 $this->redirect('/profil');
@@ -246,6 +253,63 @@ class ProfilController extends Controller {
         );
     }
 
+    /**
+     * Page de gestion de l'avatar
+     * @return void
+     */
+    public function avatarAction(): void {
+        $_SESSION[self::NOM_SESSION_TOKEN_PROFIL] = uniqid();
+        $this->paramsView['token'] = $_SESSION[self::NOM_SESSION_TOKEN_PROFIL];
+        $this->paramsView['profil'] = $this->profil;
+        $this->view->setTemplate(
+            ViewBlocks::CONTENU,
+            'profil/avatar.twig',
+            'avatarProfil',
+            $this->paramsView
+        );
+        $this->view->render();
+    }
+
+    /**
+     * Gestion de la soumission d'avatar
+     * @return void
+     * @codeCoverageIgnore (Pas envie de faire les tests pour l'upload de fichier....)
+     */
+    public function postAvatarAction(): void {
+        if (isset($_POST["editerAvatar"]) && isset($_FILES["avatar"]['tmp_name']) && $_FILES["avatar"]['tmp_name'] !== '') {
+            $finfo = new finfo(FILEINFO_MIME_TYPE);
+            $fileType = $finfo->file($_FILES["avatar"]['tmp_name']);
+            if (!in_array($fileType, ['image/jpeg', 'image/jpg', 'image/png'])) {
+                $_SESSION[self::NOM_SESSION_ERREUR_PROFIL] = Erreurs::TYPE_IMAGE_NON_CONFORME;
+            } else {
+                if ($_FILES["avatar"]["size"] > 200000) {
+                    $_SESSION[self::NOM_SESSION_ERREUR_PROFIL] = Erreurs::IMAGE_TROP_GROSSE;
+                } else {
+                    if ($this->profil->isAvatar()) {
+                        unlink(PUBLIC_DIR . $this->profil->getAvatar());
+                    }
+                    if (move_uploaded_file($_FILES["avatar"]["tmp_name"], self::AVATAR_DIR . $this->profil->getId() . ($fileType === 'image/png' ? '.png' : '.jpg'))) {
+                        $this->profil->setAvatar(true);
+                        $this->profil->sauvegarde();
+                    } else {
+                        $_SESSION[self::NOM_SESSION_ERREUR_PROFIL] = Erreurs::IMAGE_ERREUR_INCONNUE;
+                    }
+                }
+            }
+            $this->redirect('/profil/avatar');
+        } elseif (isset($_POST['supprimerAvatar'])) {
+            if ($this->profil->isAvatar()) {
+                unlink(PUBLIC_DIR . $this->profil->getAvatar());
+                $this->profil->setAvatar(false);
+                $this->profil->sauvegarde();
+            }
+            $this->redirect('/profil');
+        } else {
+            $_SESSION[self::NOM_SESSION_ERREUR_PROFIL] = Erreurs::TYPE_IMAGE_NON_CONFORME;
+            $this->redirect('/profil/avatar');
+        }
+    }
+
     protected function getMessageErreur(Erreurs $erreur): string {
         return match ($erreur) {
             Erreurs::FORMULAIRE_NON_VALIDE => "Votre formulaire était non valide, veuillez réessayer.",
@@ -263,6 +327,9 @@ class ProfilController extends Controller {
             Erreurs::DATE_FIN_PASSEE => "Vous ne pouvez pas renseigner une date de fin de contrat dans le passé.",
             Erreurs::CHAMP_MANQUANT => "Vous devez renseigner un département pour votre contrat.",
             Erreurs::DEPARTEMENT_INCONNU => "Le département renseigné est inconnu.",
+            Erreurs::TYPE_IMAGE_NON_CONFORME => "Seules les images JPG et PNG sont autorisées pour les avatars.",
+            Erreurs::IMAGE_TROP_GROSSE => "Les images doivent faire moins de 2MB.",
+            Erreurs::IMAGE_ERREUR_INCONNUE => "Quelque chose s'est mal passé pendant l'upload de votre avatar",
             default => ""
         };
     }

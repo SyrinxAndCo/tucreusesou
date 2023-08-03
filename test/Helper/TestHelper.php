@@ -10,6 +10,8 @@ function session_destroy(): void {
     $_SESSION = null;
 }
 
+const PUBLIC_DIR = '';
+
 namespace TuCreusesOu\Test\Helper;
 
 use TuCreusesOu\Model\Contrat;
@@ -24,6 +26,7 @@ class TestHelper {
             password_hash('mdp', PASSWORD_DEFAULT),
             'mail',
             [],
+            0,
             'description',
             new Contrat(
                 0,

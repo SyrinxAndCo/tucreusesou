@@ -85,4 +85,12 @@ class ModelsHelper {
     public function existeDepartementId(int $id): bool {
         return Departement::existeId($id);
     }
+
+    /**
+     * Renvoie la liste de tous les profils enregistrés inscrits à la newsletter
+     * @return array
+     */
+    public function getProfilsNewsletter(): array {
+        return Profil::getProfilsNewsletter();
+    }
 }

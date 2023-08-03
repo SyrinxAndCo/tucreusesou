@@ -1,0 +1,27 @@
+{% block avatarProfil %}
+    <button class="retour boutonLien"><a href="/profil">Retour au profil</a></button>
+    <div class="avatarProfil">
+        {{ include('blocs/erreur.twig', {erreur: erreur}, with_context = false) }}
+        {% if profil.isAvatar %}
+            <img src="{{ profil.avatar }}" alt="Avatar de {{ profil.prenom }} {{ profil.nom }}" class="avatar">
+        {% else %}
+            <div class="message info">
+                Vous n'avez pas encore d'avatar.
+            </div>
+        {% endif %}
+        <form method="post" action="/profil/postAvatar" enctype="multipart/form-data">
+            <input type="hidden" name="token" id="token" value="{{ toekn }}"/>
+            <div class="message info">
+                Les images autorisées sont les images JPG ou PNG d'une taille inférieure à 2MB.
+            </div>
+            <div class="uploadAvatar">
+                <label for="avatar">Uploader un avatar : </label>
+                <input type="file" name="avatar" id="avatar">
+            </div>
+            <div class="boutonsAvatar">
+                <button name="editerAvatar" class="boutonValider">Uploader le nouvel avatar</button>
+                <button name="supprimerAvatar" class="boutonSupprimer">Supprimer l'avatar</button>
+            </div>
+        </form>
+    </div>
+{% endblock %}
